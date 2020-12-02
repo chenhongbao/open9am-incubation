@@ -56,7 +56,8 @@ public enum ErrorCodes {
     INCONSISTENT_FROZEN_INFO(0x00000021, "Incompleted info."),
     INVALID_CANCELING_MARGIN_STATUS(0x00000022, "Invalid canceling status."),
     MARGIN_NULL(0x00000023, "Margin null."),
-    UNEXPECTED_ERROR(0x00000024, "Unexpected error.");
+    UNEXPECTED_ERROR(0x00000024, "Unexpected error."),
+    OBJECT_COPY_FAILED(0x00000025, "Object copy failed.");
 
     private final int code;
     private final String message;

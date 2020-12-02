@@ -36,6 +36,7 @@ public class Contract {
     private OrderType openType;
     private Long responseId;
     private ContractStatus status;
+    private Integer traderId;
     private ZonedDateTime updateTimestamp;
 
     public Contract() {
@@ -120,6 +121,14 @@ public class Contract {
     public void setStatus(ContractStatus status) {
         this.status = status;
         updateTimestamp();
+    }
+
+    public Integer getTraderId() {
+        return traderId;
+    }
+
+    public void setTraderId(Integer traderId) {
+        this.traderId = traderId;
     }
 
     public ZonedDateTime getUpdateTimestamp() {

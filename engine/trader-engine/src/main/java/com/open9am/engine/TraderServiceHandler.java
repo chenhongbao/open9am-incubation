@@ -23,6 +23,7 @@ import com.open9am.service.Contract;
 import com.open9am.service.ContractStatus;
 import com.open9am.service.FeeStatus;
 import com.open9am.service.ITraderServiceHandler;
+import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
@@ -189,7 +190,9 @@ public class TraderServiceHandler implements ITraderServiceHandler {
                     dealOpen(b.getCommission(),
                              b.getMargin(),
                              b.getContract(),
-                             ds);
+                             response,
+                             ds
+                    );
                     ++count;
                 }
                 if (count < response.getVolumn()) {
@@ -213,6 +216,7 @@ public class TraderServiceHandler implements ITraderServiceHandler {
                     dealClose(b.getCommission(),
                               b.getMargin(),
                               b.getContract(),
+                              response,
                               ds);
                     ++count;
                 }
@@ -249,7 +253,7 @@ public class TraderServiceHandler implements ITraderServiceHandler {
 
     @Override
     public void OnStatusChange(int status) {
-        Loggers.get().info("Trader service status: {}.", status);
+        Loggers.get().debug("Trader service status: {}.", status);
         try {
             info.getEngine().getHandler().OnTraderServiceStatusChange(status);
         }
@@ -338,13 +342,27 @@ public class TraderServiceHandler implements ITraderServiceHandler {
     private void dealClose(Commission commission,
                            Margin margin,
                            Contract contract,
-                           IDataSource ds) throws DataSourceException {
+                           OrderResponse response,
+                           IDataSource ds) throws TraderException {
         requireStatus(commission, FeeStatus.FORZEN);
         requireStatus(margin, FeeStatus.DEALED);
         requireStatus(contract, ContractStatus.CLOSING);
+        /*
+         * Update commission.
+         */
         commission.setStatus(FeeStatus.DEALED);
         ds.updateCommission(commission);
+        /*
+         * Remove margin.
+         */
         ds.removeMargin(margin.getMarginId());
+        /*
+         * Update contract.
+         */
+        var price = response.getPrice();
+        var instrument = getInstrument(response.getInstrumentId());
+        var amount = info.getEngine().getAlgorithm().getAmount(price, instrument);
+        contract.setCloseAmount(amount);
         contract.setStatus(ContractStatus.CLOSED);
         ds.updateContract(contract);
     }
@@ -352,15 +370,32 @@ public class TraderServiceHandler implements ITraderServiceHandler {
     private void dealOpen(Commission commission,
                           Margin margin,
                           Contract contract,
-                          IDataSource ds) throws DataSourceException {
+                          OrderResponse response,
+                          IDataSource ds) throws TraderException {
         requireStatus(commission, FeeStatus.FORZEN);
         requireStatus(margin, FeeStatus.FORZEN);
         requireStatus(contract, ContractStatus.OPENING);
+        /*
+         * Update commission.
+         */
         commission.setStatus(FeeStatus.DEALED);
         ds.updateCommission(commission);
+        /*
+         * Update margin.
+         */
         margin.setStatus(FeeStatus.DEALED);
         ds.updateMargin(margin);
+        /*
+         * Update contract.
+         */
+        var price = response.getPrice();
+        var instrument = getInstrument(response.getInstrumentId());
+        var amount = info.getEngine().getAlgorithm().getAmount(price, instrument);
+        contract.setOpenAmount(amount);
         contract.setStatus(ContractStatus.OPEN);
+        contract.setResponseId(response.getResponseId());
+        contract.setOpenTimestamp(response.getTimestamp());
+        contract.setOpenTradingDay(response.getTradingDay());
         ds.updateCommission(commission);
     }
 
@@ -390,6 +425,17 @@ public class TraderServiceHandler implements ITraderServiceHandler {
         }
         checkFrozenInfo(map.values());
         return map.values();
+    }
+
+    private Instrument getInstrument(String instrumentId) throws TraderException {
+        var instrument = info.getEngine().getRelatedInstrument(instrumentId);
+        if (instrument == null) {
+            throw new TraderException(
+                    ErrorCodes.INSTRUMENT_NULL.code(),
+                    ErrorCodes.INSTRUMENT_NULL.message() + "(Instrument ID:"
+                    + instrumentId + ")");
+        }
+        return instrument;
     }
 
     private Margin getMarginByContractId(Long contractId, Collection<Margin> ms) {

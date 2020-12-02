@@ -69,4 +69,6 @@ public interface ITraderEngine {
     ITraderEngineAlgorithm getAlgorithm();
 
     ITraderEngineHandler getHandler();
+
+    Instrument getRelatedInstrument(String instrumentId) throws TraderException;
 }

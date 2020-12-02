@@ -18,9 +18,11 @@ import com.open9am.service.TraderRuntimeException;
 import com.open9am.service.utils.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +33,7 @@ public class TraderEngine implements ITraderEngine {
     private IDataSource ds;
     private final Properties globalStartProps;
     private ITraderEngineHandler handler;
+    private final ConcurrentHashMap<String, Instrument> instruments;
     private final ConcurrentHashMap<Long, Integer> orderTraders;
     private EngineStatus status;
     private final ConcurrentHashMap<Integer, TraderServiceRuntime> traders;
@@ -39,6 +42,7 @@ public class TraderEngine implements ITraderEngine {
         algo = algorithm;
         traders = new ConcurrentHashMap<>(32);
         orderTraders = new ConcurrentHashMap<>(1024);
+        instruments = new ConcurrentHashMap<>(512);
         globalStartProps = new Properties();
     }
 
@@ -70,6 +74,11 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public ITraderEngineHandler getHandler() {
         return handler;
+    }
+
+    @Override
+    public Instrument getRelatedInstrument(String instrumentId) throws TraderException {
+        return instruments.get(instrumentId);
     }
 
     @Override
@@ -147,9 +156,89 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
-    public void request(OrderRequest request, Instrument instrument, Properties properties, int requestId) throws TraderException {
-        checkAssets(request, instrument, properties);
-        forwardRequest(request, requestId);
+    public void request(OrderRequest request,
+                        Instrument instrument,
+                        Properties properties,
+                        int requestId) throws TraderException {
+        check0();
+        check2(request, instrument);
+        /*
+         * Remmeber the instrument it once operated.
+         */
+        instruments.put(instrument.getInstrumentId(), instrument);
+        var type = request.getType();
+        if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
+            decideTrader(request);
+            checkAssetsOpen(request, instrument, properties);
+            forwardRequest(request, request.getTraderId(), requestId);
+        }
+        else {
+            var cs = checkAssetsClose(request, instrument);
+            for (var r : group(cs, request)) {
+                forwardRequest(r, r.getTraderId(), requestId);
+            }
+        }
+    }
+
+    private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {
+        final var today = new HashMap<Integer, OrderRequest>(64);
+        final var yd = new HashMap<Integer, OrderRequest>(64);
+        for (var c : cs) {
+            if (c.getOpenTradingDay().isBefore(ds.getTradingDay())) {
+                var o = yd.computeIfAbsent(c.getTraderId(), k -> {
+                                   var co = Utils.copy(request);
+                                   if (co == null) {
+                                       throw new TraderRuntimeException(
+                                               ErrorCodes.OBJECT_COPY_FAILED.code(),
+                                               ErrorCodes.OBJECT_COPY_FAILED.message());
+                                   }
+                                   if (co.getType() == OrderType.BUY_CLOSE_TODAY) {
+                                       co.setType(OrderType.BUY_CLOSE);
+                                   }
+                                   else if (co.getType() == OrderType.SELL_CLOSE_TODAY) {
+                                       co.setType(OrderType.SELL_CLOSE);
+                                   }
+                                   co.setVolumn(0L);
+                                   co.setTraderId(k);
+                                   return co;
+
+                               });
+                o.setVolumn(o.getVolumn() + 1);
+            }
+            else {
+                var o = today.computeIfAbsent(c.getTraderId(), k -> {
+                                      var co = Utils.copy(request);
+                                      if (co == null) {
+                                          throw new TraderRuntimeException(
+                                                  ErrorCodes.OBJECT_COPY_FAILED.code(),
+                                                  ErrorCodes.OBJECT_COPY_FAILED.message());
+                                      }
+                                      if (co.getType() == OrderType.BUY_CLOSE) {
+                                          co.setType(OrderType.BUY_CLOSE_TODAY);
+                                      }
+                                      else if (co.getType() == OrderType.SELL_CLOSE) {
+                                          co.setType(OrderType.SELL_CLOSE_TODAY);
+                                      }
+                                      co.setVolumn(0L);
+                                      co.setTraderId(k);
+                                      return co;
+
+                                  });
+                o.setVolumn(o.getVolumn() + 1);
+            }
+        }
+
+        var r = new HashSet<OrderRequest>(today.values());
+        r.addAll(yd.values());
+        return r;
+    }
+
+    private void decideTrader(OrderRequest request) throws TraderException {
+        var rt = getProperTrader(request);
+        if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
+            request.setTraderId(rt.getTraderId());
+            Loggers.get().debug("Route order({}) to trader({}).", request.getOrderId(), rt.getTraderId());
+        }
     }
 
     @Override
@@ -158,7 +247,7 @@ public class TraderEngine implements ITraderEngine {
             throw new TraderException(ErrorCodes.REQUEST_NULL.code(),
                                       ErrorCodes.REQUEST_NULL.message());
         }
-        forwardRequest(request, requestId);
+        forwardRequest(request, request.getTraderId(), requestId);
     }
 
     @Override
@@ -400,29 +489,21 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private void checkAssets(OrderRequest request, Instrument instrument, Properties properties) throws TraderException {
-        check0();
-        check2(request, instrument);
-        var type = request.getType();
-        if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
-            checkAssetsOpen(request, instrument, properties);
-        }
-        else {
-            checkAssetsClose(request, instrument);
-        }
-    }
-
-    private void checkAssetsClose(OrderRequest request, Instrument instrument) throws TraderException {
+    private Collection<Contract> checkAssetsClose(OrderRequest request, Instrument instrument) throws TraderException {
         checkVolumn(request.getVolumn());
         var cs = getAvailableContracts(request);
         if (cs.size() < request.getVolumn()) {
             throw new TraderException(ErrorCodes.INSUFFICIENT_POSITION.code(),
                                       ErrorCodes.INSUFFICIENT_POSITION.message());
         }
+        var r = new HashSet<Contract>(32);
         var c = algo.getCommission(request.getPrice(), instrument);
         for (int i = 0; i < request.getVolumn(); ++i) {
-            setFrozenClose(c, cs.get(i), request.getType());
+            var ctr = cs.get(i);
+            r.add(ctr);
+            setFrozenClose(c, ctr, request.getType());
         }
+        return r;
     }
 
     private void checkAssetsOpen(OrderRequest request, Instrument instrument, Properties properties)
@@ -484,20 +565,15 @@ public class TraderEngine implements ITraderEngine {
         return rt;
     }
 
-    private void forwardRequest(OrderRequest request, int requestId) throws TraderException {
-        var trader = getProperTrader(request).getTrader();
-        if (trader == null) {
-            throw new TraderException(ErrorCodes.TRADER_SERVICE_NULL.code(),
-                                      ErrorCodes.TRADER_SERVICE_NULL.message());
-        }
-        trader.insert(request, requestId);
-    }
-
-    private void forwardRequest(CancelRequest request, int requestId) throws TraderException {
-        var traderId = request.getTraderId();
+    private <T> void forwardRequest(T request, Integer traderId, int requestId) throws TraderException {
         var tr = findTraderServiceRuntimeByTraderId(traderId);
         check1(traderId, tr);
-        tr.getTrader().cancel(request, requestId);
+        if (request instanceof OrderRequest) {
+            tr.getTrader().insert((OrderRequest) request, requestId);
+        }
+        else {
+            tr.getTrader().cancel((CancelRequest) request, requestId);
+        }
     }
 
     private List<Contract> getAvailableContracts(OrderRequest request) throws TraderException {
@@ -625,6 +701,7 @@ public class TraderEngine implements ITraderEngine {
              */
             var ctr = new Contract();
             ctr.setContractId(Utils.getId());
+            ctr.setTraderId(request.getTraderId());
             ctr.setInstrumentId(request.getInstrumentId());
             ctr.setOpenAmount(amount);
             ctr.setOpenTradingDay(ds.getTradingDay());

@@ -29,7 +29,7 @@ import java.util.Properties;
  */
 public class TraderServiceRuntime {
 
-    private boolean enabled;
+    private Boolean enabled;
     private ITraderEngine engine;
     private ITraderServiceHandler handler;
     private Properties initProperties;
@@ -38,7 +38,7 @@ public class TraderServiceRuntime {
     private Properties settleProperties;
     private Properties startProperties;
     private ITraderService trader;
-    private long traderId;
+    private Integer traderId;
     private ZonedDateTime updateTimestamp;
 
     public TraderServiceRuntime() {
@@ -130,11 +130,11 @@ public class TraderServiceRuntime {
         updateTimestamp();
     }
 
-    public long getTraderId() {
+    public Integer getTraderId() {
         return traderId;
     }
 
-    public void setTraderId(long traderId) {
+    public void setTraderId(Integer traderId) {
         this.traderId = traderId;
         updateTimestamp();
     }
@@ -143,11 +143,11 @@ public class TraderServiceRuntime {
         return updateTimestamp;
     }
 
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
         updateTimestamp();
     }
