@@ -60,7 +60,11 @@ public enum ErrorCodes {
     OBJECT_COPY_FAILED(0x00000025, "Object copy failed."),
     DEST_ID_NOT_FOUND(0x00000026, "Destinated ID(s) not found."),
     COUNTDOWN_NOT_FOUND(0x00000027, "Count down not found."),
-    PREPROC_RSPS_FAILED(0x00000028, "Preprocess response failed.");
+    PREPROC_RSPS_FAILED(0x00000028, "Preprocess response failed."),
+    PROPERTIES_NULL(0x00000029, "Properties null."),
+    PROPERTY_NOT_FOUND(0x0000002A, "Property not found."),
+    PROPERTY_WRONG_DATE_TYPE(0x0000002B, "Wrong date type in properties."),
+    PROPERTY_WRONG_PRICE_TYPE(0x0000002B, "Wrong price type in properties.");
 
     private final int code;
     private final String message;

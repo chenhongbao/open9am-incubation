@@ -619,6 +619,8 @@ public class TraderEngine implements ITraderEngine {
             throws DataSourceException, TraderEngineAlgorithmException {
         return algo.getAccount(ds.getAccount(),
                                algo.getPositions(ds.getContracts(),
+                                                 ds.getCommissions(),
+                                                 ds.getMargins(),
                                                  properties));
     }
 

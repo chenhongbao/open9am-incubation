@@ -55,7 +55,7 @@ public class IdTranslator {
         synchronized (destDownCounts) {
             c = destDownCounts.get(destId);
             if (c == null) {
-                throw new NullPointerException("No such destinated ID(" + destId + ").");
+                throw new NullPointerException("Count down not found(" + destId + ").");
             }
             c -= count;
             destDownCounts.put(destId, c);
@@ -71,9 +71,7 @@ public class IdTranslator {
 
     public Long getDestinatedId(Long srcId, Long downCount) {
         var i = getDestinatedId(srcId);
-        synchronized (destDownCounts) {
-            destDownCounts.put(i, downCount);
-        }
+        initCountDown(i, downCount);
         return i;
     }
 
@@ -97,6 +95,12 @@ public class IdTranslator {
 
     public Long getSourceId(Long destId) {
         return dests.get(destId);
+    }
+
+    private void initCountDown(Long destId, Long count) {
+        synchronized (destDownCounts) {
+            destDownCounts.put(destId, count);
+        }
     }
 
 }

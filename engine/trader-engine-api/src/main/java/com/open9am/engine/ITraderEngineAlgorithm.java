@@ -17,8 +17,10 @@
 package com.open9am.engine;
 
 import com.open9am.service.Account;
+import com.open9am.service.Commission;
 import com.open9am.service.Contract;
 import com.open9am.service.Instrument;
+import com.open9am.service.Margin;
 import com.open9am.service.Order;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
@@ -36,7 +38,10 @@ public interface ITraderEngineAlgorithm {
 
     Account getAccount(Account pre, Collection<Position> positions) throws TraderEngineAlgorithmException;
 
-    Collection<Position> getPositions(Collection<Contract> contracts, Properties properties) throws TraderEngineAlgorithmException;
+    Collection<Position> getPositions(Collection<Contract> contracts,
+                                      Collection<Commission> commissions,
+                                      Collection<Margin> margins,
+                                      Properties properties) throws TraderEngineAlgorithmException;
 
     Order getOrder(OrderRequest request, Collection<OrderResponse> responses) throws TraderEngineAlgorithmException;
 

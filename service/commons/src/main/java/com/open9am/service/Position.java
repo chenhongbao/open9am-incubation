@@ -29,9 +29,9 @@ public class Position {
 
     private Double amount;
     private Double closeProfit;
-    private Double frozenCloseVolumn;
+    private Long frozenCloseVolumn;
     private Double frozenMargin;
-    private Double frozenOpenVolumn;
+    private Long frozenOpenVolumn;
     private String instrumentId;
     private Double margin;
     private Double positionProfit;
@@ -67,11 +67,11 @@ public class Position {
         updateTimestamp();
     }
 
-    public Double getFrozenCloseVolumn() {
+    public Long getFrozenCloseVolumn() {
         return frozenCloseVolumn;
     }
 
-    public void setFrozenCloseVolumn(Double frozenCloseVolumn) {
+    public void setFrozenCloseVolumn(Long frozenCloseVolumn) {
         this.frozenCloseVolumn = frozenCloseVolumn;
         updateTimestamp();
     }
@@ -85,11 +85,11 @@ public class Position {
         updateTimestamp();
     }
 
-    public Double getFrozenOpenVolumn() {
+    public Long getFrozenOpenVolumn() {
         return frozenOpenVolumn;
     }
 
-    public void setFrozenOpenVolumn(Double frozenOpenVolumn) {
+    public void setFrozenOpenVolumn(Long frozenOpenVolumn) {
         this.frozenOpenVolumn = frozenOpenVolumn;
         updateTimestamp();
     }
