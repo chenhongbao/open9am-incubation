@@ -40,7 +40,7 @@ import java.util.Objects;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class TraderServiceHandler implements ITraderServiceHandler {
+public class TraderServiceHandler extends IdTranslator implements ITraderServiceHandler {
 
     private final TraderServiceRuntime info;
 
@@ -52,6 +52,10 @@ public class TraderServiceHandler implements ITraderServiceHandler {
     public void OnCancelResponse(CancelResponse response) {
         IDataSource ds = null;
         try {
+            preprocess(response);
+            /*
+             * Get data source and start transaction.
+             */
             ds = getDataSource();
             ds.transaction();
             /*
@@ -167,6 +171,10 @@ public class TraderServiceHandler implements ITraderServiceHandler {
     public void OnOrderReponse(OrderResponse response) {
         IDataSource ds = null;
         try {
+            preprocess(response);
+            /*
+             * Get data source and start transaction.
+             */
             ds = getDataSource();
             ds.transaction();
             /*
@@ -445,6 +453,51 @@ public class TraderServiceHandler implements ITraderServiceHandler {
             }
         }
         return null;
+    }
+
+    private Long getSrcId(Long destId) {
+        if (destId == null) {
+            throw new NullPointerException("Destinated ID null.");
+        }
+        var srcId = getSourceId(destId);
+        if (srcId == null) {
+            throw new NullPointerException("Source ID not found(Destinated ID:" + destId + ").");
+        }
+        return srcId;
+    }
+
+    private void preprocess(OrderResponse response) throws TraderException {
+        try {
+            /*
+             * Order is canceled, so count down to zero.
+             */
+            super.countDown(response.getOrderId(), response.getVolumn());
+            response.setOrderId(getSrcId(response.getOrderId()));
+        }
+        catch (Throwable th) {
+            throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),
+                                      ErrorCodes.PREPROC_RSPS_FAILED.message(),
+                                      th);
+        }
+    }
+
+    private void preprocess(CancelResponse response) throws TraderException {
+        try {
+            var rest = super.getDownCountByDestId(response.getOrderId());
+            if (rest == null) {
+                throw new NullPointerException("Count down not found(" + response.getOrderId() + ").");
+            }
+            /*
+             * Order is canceled, so count down to zero.
+             */
+            super.countDown(response.getOrderId(), rest);
+            response.setOrderId(getSrcId(response.getOrderId()));
+        }
+        catch (Throwable th) {
+            throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),
+                                      ErrorCodes.PREPROC_RSPS_FAILED.message(),
+                                      th);
+        }
     }
 
     private void requireStatus(Contract c, ContractStatus s) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2020 Hongbao Chen <chenhongbao@outlook.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.open9am.engine;
 
 import com.open9am.service.Account;
@@ -36,7 +52,7 @@ public class TraderEngine implements ITraderEngine {
     private final ConcurrentHashMap<String, Instrument> instruments;
     private final ConcurrentHashMap<Long, Integer> orderTraders;
     private EngineStatus status;
-    private final ConcurrentHashMap<Integer, TraderServiceRuntime> traders;
+    private final ConcurrentHashMap<Integer, ExtendedTraderServiceRuntime> traders;
 
     public TraderEngine(ITraderEngineAlgorithm algorithm) {
         algo = algorithm;
@@ -180,67 +196,6 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {
-        final var today = new HashMap<Integer, OrderRequest>(64);
-        final var yd = new HashMap<Integer, OrderRequest>(64);
-        for (var c : cs) {
-            if (c.getOpenTradingDay().isBefore(ds.getTradingDay())) {
-                var o = yd.computeIfAbsent(c.getTraderId(), k -> {
-                                   var co = Utils.copy(request);
-                                   if (co == null) {
-                                       throw new TraderRuntimeException(
-                                               ErrorCodes.OBJECT_COPY_FAILED.code(),
-                                               ErrorCodes.OBJECT_COPY_FAILED.message());
-                                   }
-                                   if (co.getType() == OrderType.BUY_CLOSE_TODAY) {
-                                       co.setType(OrderType.BUY_CLOSE);
-                                   }
-                                   else if (co.getType() == OrderType.SELL_CLOSE_TODAY) {
-                                       co.setType(OrderType.SELL_CLOSE);
-                                   }
-                                   co.setVolumn(0L);
-                                   co.setTraderId(k);
-                                   return co;
-
-                               });
-                o.setVolumn(o.getVolumn() + 1);
-            }
-            else {
-                var o = today.computeIfAbsent(c.getTraderId(), k -> {
-                                      var co = Utils.copy(request);
-                                      if (co == null) {
-                                          throw new TraderRuntimeException(
-                                                  ErrorCodes.OBJECT_COPY_FAILED.code(),
-                                                  ErrorCodes.OBJECT_COPY_FAILED.message());
-                                      }
-                                      if (co.getType() == OrderType.BUY_CLOSE) {
-                                          co.setType(OrderType.BUY_CLOSE_TODAY);
-                                      }
-                                      else if (co.getType() == OrderType.SELL_CLOSE) {
-                                          co.setType(OrderType.SELL_CLOSE_TODAY);
-                                      }
-                                      co.setVolumn(0L);
-                                      co.setTraderId(k);
-                                      return co;
-
-                                  });
-                o.setVolumn(o.getVolumn() + 1);
-            }
-        }
-
-        var r = new HashSet<OrderRequest>(today.values());
-        r.addAll(yd.values());
-        return r;
-    }
-
-    private void decideTrader(OrderRequest request) throws TraderException {
-        var rt = getProperTrader(request);
-        if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
-            request.setTraderId(rt.getTraderId());
-            Loggers.get().debug("Route order({}) to trader({}).", request.getOrderId(), rt.getTraderId());
-        }
-    }
-
     @Override
     public void request(CancelRequest request, int requestId) throws TraderException {
         if (request == null) {
@@ -322,7 +277,7 @@ public class TraderEngine implements ITraderEngine {
     }
 
     private void addTrader(int traderId, ITraderService trader) {
-        var i = new TraderServiceRuntime();
+        var i = new ExtendedTraderServiceRuntime();
         i.setEnabled(false);
         i.setEngine(this);
         i.setTrader(trader);
@@ -534,6 +489,22 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
+    private void clearInternals() {
+        orderTraders.clear();
+        instruments.clear();
+        traders.values().forEach(s -> {
+            s.getIdTranslator().clear();
+        });
+    }
+
+    private void decideTrader(OrderRequest request) throws TraderException {
+        var rt = getProperTrader(request);
+        if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
+            request.setTraderId(rt.getTraderId());
+            Loggers.get().debug("Route order({}) to trader({}).", request.getOrderId(), rt.getTraderId());
+        }
+    }
+
     private Integer findTraderIdByOrderId(long orderId) throws TraderException {
         var traderId = orderTraders.get(orderId);
         if (traderId == null) {
@@ -543,7 +514,7 @@ public class TraderEngine implements ITraderEngine {
         return traderId;
     }
 
-    private TraderServiceRuntime findTraderRandomly(OrderRequest request) throws TraderException {
+    private ExtendedTraderServiceRuntime findTraderRandomly(OrderRequest request) throws TraderException {
         var a = new ArrayList<>(traders.keySet());
         traders.forEach((k, v) -> {
             if (v.isEnabled()) {
@@ -559,7 +530,7 @@ public class TraderEngine implements ITraderEngine {
         return traders.get(traderId);
     }
 
-    private TraderServiceRuntime findTraderServiceRuntimeByTraderId(int traderId) throws TraderException {
+    private ExtendedTraderServiceRuntime findTraderServiceRuntimeByTraderId(int traderId) throws TraderException {
         var rt = traders.get(traderId);
         check1(traderId, rt);
         return rt;
@@ -569,10 +540,36 @@ public class TraderEngine implements ITraderEngine {
         var tr = findTraderServiceRuntimeByTraderId(traderId);
         check1(traderId, tr);
         if (request instanceof OrderRequest) {
-            tr.getTrader().insert((OrderRequest) request, requestId);
+            var order = (OrderRequest) request;
+            var destId = tr.getIdTranslator().getDestinatedId(order.getOrderId(), order.getVolumn());
+            order.setOrderId(destId);
+            tr.getTrader().insert(order, requestId);
         }
-        else {
-            tr.getTrader().cancel((CancelRequest) request, requestId);
+        else if (request instanceof CancelRequest) {
+            var cancel = (CancelRequest) request;
+            var ids = tr.getIdTranslator().getDestinatedIds(cancel.getOrderId());
+            if (ids == null) {
+                throw new TraderException(ErrorCodes.DEST_ID_NOT_FOUND.code(),
+                                          ErrorCodes.DEST_ID_NOT_FOUND.message()
+                                          + "(Source order ID:" + cancel.getOrderId() + ")");
+            }
+            for (var i : ids) {
+                /*
+                 * If the order is fulfilled, don't cancel it any more.
+                 */
+                var cd = tr.getIdTranslator().getDownCountByDestId(i);
+                if (cd == null) {
+                    throw new TraderException(
+                            ErrorCodes.COUNTDOWN_NOT_FOUND.code(),
+                            ErrorCodes.COUNTDOWN_NOT_FOUND.message() + "(Destinated ID: " + i + ")");
+                }
+                if (cd <= 0) {
+                    continue;
+                }
+                var c = Utils.copy(cancel);
+                c.setOrderId(i);
+                tr.getTrader().cancel(c, requestId);
+            }
         }
     }
 
@@ -623,6 +620,60 @@ public class TraderEngine implements ITraderEngine {
         return algo.getAccount(ds.getAccount(),
                                algo.getPositions(ds.getContracts(),
                                                  properties));
+    }
+
+    private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {
+        final var today = new HashMap<Integer, OrderRequest>(64);
+        final var yd = new HashMap<Integer, OrderRequest>(64);
+        var tradingDay = ds.getTradingDay();
+        for (var c : cs) {
+            if (c.getOpenTradingDay().isBefore(tradingDay)) {
+                var o = yd.computeIfAbsent(c.getTraderId(), k -> {
+                                   var co = Utils.copy(request);
+                                   if (co == null) {
+                                       throw new TraderRuntimeException(
+                                               ErrorCodes.OBJECT_COPY_FAILED.code(),
+                                               ErrorCodes.OBJECT_COPY_FAILED.message());
+                                   }
+                                   if (co.getType() == OrderType.BUY_CLOSE_TODAY) {
+                                       co.setType(OrderType.BUY_CLOSE);
+                                   }
+                                   else if (co.getType() == OrderType.SELL_CLOSE_TODAY) {
+                                       co.setType(OrderType.SELL_CLOSE);
+                                   }
+                                   co.setVolumn(0L);
+                                   co.setTraderId(k);
+                                   return co;
+
+                               });
+                o.setVolumn(o.getVolumn() + 1);
+            }
+            else {
+                var o = today.computeIfAbsent(c.getTraderId(), k -> {
+                                      var co = Utils.copy(request);
+                                      if (co == null) {
+                                          throw new TraderRuntimeException(
+                                                  ErrorCodes.OBJECT_COPY_FAILED.code(),
+                                                  ErrorCodes.OBJECT_COPY_FAILED.message());
+                                      }
+                                      if (co.getType() == OrderType.BUY_CLOSE) {
+                                          co.setType(OrderType.BUY_CLOSE_TODAY);
+                                      }
+                                      else if (co.getType() == OrderType.SELL_CLOSE) {
+                                          co.setType(OrderType.SELL_CLOSE_TODAY);
+                                      }
+                                      co.setVolumn(0L);
+                                      co.setTraderId(k);
+                                      return co;
+
+                                  });
+                o.setVolumn(o.getVolumn() + 1);
+            }
+        }
+
+        var r = new HashSet<OrderRequest>(today.values());
+        r.addAll(yd.values());
+        return r;
     }
 
     private void initAccount(Account a) throws TraderException {
@@ -724,7 +775,7 @@ public class TraderEngine implements ITraderEngine {
              * Add frozen commission.
              */
             var mn = new Margin();
-            mn.setContractId(Utils.getId());
+            mn.setContractId(ctr.getContractId());
             mn.setMargin(margin);
             mn.setMarginId(Utils.getId());
             mn.setOrderId(request.getOrderId());
@@ -753,7 +804,7 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.ORDER_REQS_NULL.message());
         }
         for (var r : rs) {
-            var rsps = ds.getOrderResponseByOrderId(r.getOrderId());
+            var rsps = ds.getOrderResponsesByOrderId(r.getOrderId());
             if (rsps == null) {
                 throw new TraderException(ErrorCodes.ORDER_RSPS_NULL.code(),
                                           ErrorCodes.ORDER_RSPS_NULL.message());
@@ -769,11 +820,14 @@ public class TraderEngine implements ITraderEngine {
             }
         }
         // Clear everyday to avoid mem leak.
-        orderTraders.clear();
+        clearInternals();
     }
 
-    private void startEach(Integer key, TraderServiceRuntime info) throws TraderException {
+    private void startEach(Integer key, ExtendedTraderServiceRuntime info) throws TraderException {
         check1(key, info);
+        if (!info.isEnabled()) {
+            return;
+        }
         var properties = new Properties();
         if (info.getStartProperties() != null) {
             properties.putAll(info.getStartProperties());
@@ -784,7 +838,9 @@ public class TraderEngine implements ITraderEngine {
          * handler. To shared information among these handlers, use STATIC.
          */
         if (info.getHandler() == null) {
-            info.setHandler(new TraderServiceHandler(info));
+            var h = new TraderServiceHandler(info);
+            info.setHandler(h);
+            info.setIdTranslator(h);
         }
         try {
             info.getTrader().start(properties, info.getHandler());

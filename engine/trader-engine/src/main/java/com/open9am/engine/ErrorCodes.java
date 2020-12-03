@@ -57,7 +57,10 @@ public enum ErrorCodes {
     INVALID_CANCELING_MARGIN_STATUS(0x00000022, "Invalid canceling status."),
     MARGIN_NULL(0x00000023, "Margin null."),
     UNEXPECTED_ERROR(0x00000024, "Unexpected error."),
-    OBJECT_COPY_FAILED(0x00000025, "Object copy failed.");
+    OBJECT_COPY_FAILED(0x00000025, "Object copy failed."),
+    DEST_ID_NOT_FOUND(0x00000026, "Destinated ID(s) not found."),
+    COUNTDOWN_NOT_FOUND(0x00000027, "Count down not found."),
+    PREPROC_RSPS_FAILED(0x00000028, "Preprocess response failed.");
 
     private final int code;
     private final String message;

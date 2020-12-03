@@ -110,7 +110,7 @@ public interface IDataSource {
 
     Collection<OrderResponse> getOrderResponses() throws DataSourceException;
 
-    Collection<OrderResponse> getOrderResponseByOrderId(long orderId) throws DataSourceException;
+    Collection<OrderResponse> getOrderResponsesByOrderId(long orderId) throws DataSourceException;
 
     void addOrderResponse(OrderResponse response) throws DataSourceException;
 

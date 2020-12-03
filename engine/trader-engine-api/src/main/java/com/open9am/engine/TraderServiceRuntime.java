@@ -45,6 +45,11 @@ public class TraderServiceRuntime {
         registerTimestamp = ZonedDateTime.now();
     }
 
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+        updateTimestamp();
+    }
+
     public ITraderEngine getEngine() {
         return engine;
     }
@@ -145,11 +150,6 @@ public class TraderServiceRuntime {
 
     public Boolean isEnabled() {
         return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-        updateTimestamp();
     }
 
     private void updateTimestamp() {
