@@ -27,11 +27,7 @@ public enum OrderStatus {
     PART_TRADED_INQUE(0x61),
     PART_TRADED_NOQUE(0x62),
     ACCEPTED(0x63),
-    ACCEPTED_REMOTE(0x64),
-    REJECTED(0x65),
-    REJECTED_REMOTE(0x66),
-    CANCELED(0x67),
-    ERROR(0x68);
+    CANCELED(0x64);
 
     private final int c;
 

@@ -22,11 +22,13 @@ import com.open9am.service.CancelResponse;
 import com.open9am.service.Commission;
 import com.open9am.service.Contract;
 import com.open9am.service.ContractStatus;
+import com.open9am.service.Deposit;
 import com.open9am.service.FeeStatus;
 import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
+import com.open9am.service.Withdraw;
 import java.time.LocalDate;
 import java.util.Collection;
 
@@ -85,6 +87,14 @@ public interface IDataSource {
     Account getAccount() throws DataSourceException;
 
     void updateAccount(Account account) throws DataSourceException;
+
+    Collection<Deposit> getDeposits() throws DataSourceException;
+
+    void addDeposit(Deposit deposit) throws DataSourceException;
+
+    Collection<Withdraw> getWithdraws() throws DataSourceException;
+
+    void addWithdraw(Withdraw withdraw) throws DataSourceException;
 
     Collection<Instrument> getInstrumentsByExchangeId(String exchangeId) throws DataSourceException;
 

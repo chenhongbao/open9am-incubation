@@ -17,14 +17,18 @@
 package com.open9am.engine;
 
 import com.open9am.service.Account;
+import com.open9am.service.CancelResponse;
 import com.open9am.service.Commission;
 import com.open9am.service.Contract;
+import com.open9am.service.Deposit;
 import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.Order;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
+import com.open9am.service.OrderType;
 import com.open9am.service.Position;
+import com.open9am.service.Withdraw;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -36,18 +40,24 @@ import java.util.Properties;
  */
 public interface ITraderEngineAlgorithm {
 
-    Account getAccount(Account pre, Collection<Position> positions) throws TraderEngineAlgorithmException;
+    Account getAccount(Account pre,
+                       Collection<Deposit> deposits,
+                       Collection<Withdraw> withdraws,
+                       Collection<Position> positions) throws TraderEngineAlgorithmException;
 
     Collection<Position> getPositions(Collection<Contract> contracts,
                                       Collection<Commission> commissions,
                                       Collection<Margin> margins,
                                       Properties properties) throws TraderEngineAlgorithmException;
 
-    Order getOrder(OrderRequest request, Collection<OrderResponse> responses) throws TraderEngineAlgorithmException;
+    Order getOrder(OrderRequest request,
+                   Collection<Contract> contracts,
+                   Collection<OrderResponse> trades,
+                   Collection<CancelResponse> cancels) throws TraderEngineAlgorithmException;
 
     double getAmount(double price, Instrument instrument) throws TraderEngineAlgorithmException;
 
     double getMargin(double price, Instrument instrument) throws TraderEngineAlgorithmException;
 
-    double getCommission(double price, Instrument instrument) throws TraderEngineAlgorithmException;
+    double getCommission(double price, Instrument instrument, OrderType type) throws TraderEngineAlgorithmException;
 }

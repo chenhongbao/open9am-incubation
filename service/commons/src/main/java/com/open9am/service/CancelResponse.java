@@ -29,6 +29,9 @@ public class CancelResponse {
 
     private String instrumentId;
     private Long orderId;
+    private CancelReason reason;
+    private Integer statusCode;
+    private String statusMessage;
     private ZonedDateTime timestamp;
     private Integer traderId;
     private LocalDate tradingDay;
@@ -43,7 +46,6 @@ public class CancelResponse {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
-        updateTimestamp();
     }
 
     public Long getOrderId() {
@@ -52,11 +54,38 @@ public class CancelResponse {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-        updateTimestamp();
+    }
+
+    public CancelReason getReason() {
+        return reason;
+    }
+
+    public void setReason(CancelReason reason) {
+        this.reason = reason;
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getStatusMessage() {
+        return statusMessage;
+    }
+
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
     }
 
     public ZonedDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Integer getTraderId() {
@@ -65,7 +94,6 @@ public class CancelResponse {
 
     public void setTraderId(Integer traderId) {
         this.traderId = traderId;
-        updateTimestamp();
     }
 
     public LocalDate getTradingDay() {
@@ -74,7 +102,6 @@ public class CancelResponse {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public String getUuid() {
@@ -83,11 +110,6 @@ public class CancelResponse {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-        updateTimestamp();
-    }
-
-    private void updateTimestamp() {
-        timestamp = ZonedDateTime.now();
     }
 
 }

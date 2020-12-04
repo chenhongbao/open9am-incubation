@@ -39,8 +39,8 @@ public class Account {
     private Double preDeposit;
     private Double preMargin;
     private Double preWithdraw;
+    private ZonedDateTime timestamp;
     private LocalDate tradingDay;
-    private ZonedDateTime updateTimestamp;
     private Double withdraw;
 
     public Account() {
@@ -52,7 +52,6 @@ public class Account {
 
     public void setBalance(Double balance) {
         this.balance = balance;
-        updateTimestamp();
     }
 
     public Double getCloseProfit() {
@@ -61,7 +60,6 @@ public class Account {
 
     public void setCloseProfit(Double closeProfit) {
         this.closeProfit = closeProfit;
-        updateTimestamp();
     }
 
     public Double getCommission() {
@@ -70,7 +68,6 @@ public class Account {
 
     public void setCommission(Double commission) {
         this.commission = commission;
-        updateTimestamp();
     }
 
     public Double getDeposit() {
@@ -79,7 +76,6 @@ public class Account {
 
     public void setDeposit(Double deposit) {
         this.deposit = deposit;
-        updateTimestamp();
     }
 
     public Double getFrozenCommission() {
@@ -88,7 +84,6 @@ public class Account {
 
     public void setFrozenCommission(Double frozenCommission) {
         this.frozenCommission = frozenCommission;
-        updateTimestamp();
     }
 
     public Double getFrozenMargin() {
@@ -97,7 +92,6 @@ public class Account {
 
     public void setFrozenMargin(Double frozenMargin) {
         this.frozenMargin = frozenMargin;
-        updateTimestamp();
     }
 
     public Double getMargin() {
@@ -106,7 +100,6 @@ public class Account {
 
     public void setMargin(Double margin) {
         this.margin = margin;
-        updateTimestamp();
     }
 
     public Double getPositionProfit() {
@@ -115,7 +108,6 @@ public class Account {
 
     public void setPositionProfit(Double positionProfit) {
         this.positionProfit = positionProfit;
-        updateTimestamp();
     }
 
     public Double getPreBalance() {
@@ -124,7 +116,6 @@ public class Account {
 
     public void setPreBalance(Double preBalance) {
         this.preBalance = preBalance;
-        updateTimestamp();
     }
 
     public Double getPreDeposit() {
@@ -133,7 +124,6 @@ public class Account {
 
     public void setPreDeposit(Double preDeposit) {
         this.preDeposit = preDeposit;
-        updateTimestamp();
     }
 
     public Double getPreMargin() {
@@ -142,7 +132,6 @@ public class Account {
 
     public void setPreMargin(Double preMargin) {
         this.preMargin = preMargin;
-        updateTimestamp();
     }
 
     public Double getPreWithdraw() {
@@ -151,7 +140,14 @@ public class Account {
 
     public void setPreWithdraw(Double preWithdraw) {
         this.preWithdraw = preWithdraw;
-        updateTimestamp();
+    }
+
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public LocalDate getTradingDay() {
@@ -160,11 +156,6 @@ public class Account {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
-    }
-
-    public ZonedDateTime getUpdateTime() {
-        return updateTimestamp;
     }
 
     public Double getWithdraw() {
@@ -173,11 +164,6 @@ public class Account {
 
     public void setWithdraw(Double withdraw) {
         this.withdraw = withdraw;
-        updateTimestamp();
-    }
-
-    private void updateTimestamp() {
-        updateTimestamp = ZonedDateTime.now();
     }
 
 }

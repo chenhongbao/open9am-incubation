@@ -16,6 +16,7 @@
  */
 package com.open9am.engine;
 
+import com.open9am.service.CancelReason;
 import com.open9am.service.CancelRequest;
 import com.open9am.service.CancelResponse;
 import com.open9am.service.Commission;
@@ -30,6 +31,7 @@ import com.open9am.service.OrderResponse;
 import com.open9am.service.OrderType;
 import com.open9am.service.TraderException;
 import com.open9am.service.TraderRuntimeException;
+import com.open9am.service.utils.Utils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Objects;
@@ -142,6 +144,17 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                             TraderRuntimeException exception,
                             int requestId) {
         try {
+            /*
+             * Call cancel handler to cancel a bad request.
+             */
+            var cancel = initCancelResponse(request);
+            cancel.setReason(CancelReason.INVALID_REQUEST);
+            cancel.setStatusCode(exception.getCode());
+            cancel.setStatusMessage(exception.getMessage());
+            OnCancelResponse(cancel);
+            /*
+             * Call user handler.
+             */
             info.getEngine().getHandler().OnException(request,
                                                       exception,
                                                       requestId);
@@ -159,6 +172,9 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             info.getEngine().getHandler().OnException(request,
                                                       exception,
                                                       requestId);
+            /*
+             * Cancel failed, the order status is not changed.
+             */
         }
         catch (Throwable th) {
             callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
@@ -178,7 +194,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             ds = getDataSource();
             ds.transaction();
             /*
-             * Add order response.
+             * Add order response. Please note that volumn in response could be
+             * zero, notifying a status change of the inserted order request.
              */
             ds.addOrderResponse(response);
             var type = response.getType();
@@ -361,9 +378,10 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         commission.setStatus(FeeStatus.DEALED);
         ds.updateCommission(commission);
         /*
-         * Remove margin.
+         * Update margin.
          */
-        ds.removeMargin(margin.getMarginId());
+        margin.setStatus(FeeStatus.REMOVED);
+        ds.updateMargin(margin);
         /*
          * Update contract.
          */
@@ -466,6 +484,16 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         return srcId;
     }
 
+    private CancelResponse initCancelResponse(OrderRequest request) {
+        var r = new CancelResponse();
+        r.setInstrumentId(request.getInstrumentId());
+        r.setOrderId(request.getOrderId());
+        r.setTraderId(request.getTraderId());
+        r.setTradingDay(info.getTrader().getServiceInfo().getTradingDay());
+        r.setUuid(Utils.getUuid().toString());
+        return r;
+    }
+
     private void preprocess(OrderResponse response) throws TraderException {
         try {
             /*
@@ -473,6 +501,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
              */
             super.countDown(response.getOrderId(), response.getVolumn());
             response.setOrderId(getSrcId(response.getOrderId()));
+            response.setTraderId(info.getTraderId());
         }
         catch (Throwable th) {
             throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),
@@ -492,6 +521,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
              */
             super.countDown(response.getOrderId(), rest);
             response.setOrderId(getSrcId(response.getOrderId()));
+            response.setTraderId(info.getTraderId());
         }
         catch (Throwable th) {
             throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),

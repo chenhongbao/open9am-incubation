@@ -39,7 +39,7 @@ public class Instrument {
     private Long multiple;
     private Double priceTick;
     private LocalDate startDate;
-    private ZonedDateTime updateTimestamp;
+    private ZonedDateTime timestamp;
 
     public Instrument() {
     }
@@ -50,7 +50,6 @@ public class Instrument {
 
     public void setCommissionCloseRatio(Double commissionCloseRatio) {
         this.commissionCloseRatio = commissionCloseRatio;
-        updateTimestamp();
     }
 
     public Double getCommissionCloseTodayRatio() {
@@ -59,7 +58,6 @@ public class Instrument {
 
     public void setCommissionCloseTodayRatio(Double commissionCloseTodayRatio) {
         this.commissionCloseTodayRatio = commissionCloseTodayRatio;
-        updateTimestamp();
     }
 
     public Double getCommissionOpenRatio() {
@@ -68,7 +66,6 @@ public class Instrument {
 
     public void setCommissionOpenRatio(Double commissionOpenRatio) {
         this.commissionOpenRatio = commissionOpenRatio;
-        updateTimestamp();
     }
 
     public RatioType getCommissionType() {
@@ -77,7 +74,6 @@ public class Instrument {
 
     public void setCommissionType(RatioType commissionType) {
         this.commissionType = commissionType;
-        updateTimestamp();
     }
 
     public LocalDate getEndDate() {
@@ -86,7 +82,6 @@ public class Instrument {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-        updateTimestamp();
     }
 
     public String getExchangeId() {
@@ -95,7 +90,6 @@ public class Instrument {
 
     public void setExchangeId(String exchangeId) {
         this.exchangeId = exchangeId;
-        updateTimestamp();
     }
 
     public String getInstrumentId() {
@@ -104,7 +98,6 @@ public class Instrument {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
-        updateTimestamp();
     }
 
     public Double getMarginRatio() {
@@ -113,7 +106,6 @@ public class Instrument {
 
     public void setMarginRatio(Double marginRatio) {
         this.marginRatio = marginRatio;
-        updateTimestamp();
     }
 
     public RatioType getMarginType() {
@@ -122,7 +114,6 @@ public class Instrument {
 
     public void setMarginType(RatioType marginType) {
         this.marginType = marginType;
-        updateTimestamp();
     }
 
     public Long getMultiple() {
@@ -131,7 +122,6 @@ public class Instrument {
 
     public void setMultiple(Long multiple) {
         this.multiple = multiple;
-        updateTimestamp();
     }
 
     public Double getPriceTick() {
@@ -140,7 +130,6 @@ public class Instrument {
 
     public void setPriceTick(Double priceTick) {
         this.priceTick = priceTick;
-        updateTimestamp();
     }
 
     public LocalDate getStartDate() {
@@ -149,14 +138,13 @@ public class Instrument {
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
-        updateTimestamp();
     }
 
-    public ZonedDateTime getUpdateTimestamp() {
-        return updateTimestamp;
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
     }
 
-    private void updateTimestamp() {
-        updateTimestamp = ZonedDateTime.now();
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

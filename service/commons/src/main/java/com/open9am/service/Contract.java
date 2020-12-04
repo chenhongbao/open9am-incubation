@@ -36,8 +36,8 @@ public class Contract {
     private OrderType openType;
     private Long responseId;
     private ContractStatus status;
+    private ZonedDateTime timestamp;
     private Integer traderId;
-    private ZonedDateTime updateTimestamp;
 
     public Contract() {
     }
@@ -48,7 +48,6 @@ public class Contract {
 
     public void setCloseAmount(Double closeAmount) {
         this.closeAmount = closeAmount;
-        updateTimestamp();
     }
 
     public Long getContractId() {
@@ -57,7 +56,6 @@ public class Contract {
 
     public void setContractId(Long contractId) {
         this.contractId = contractId;
-        updateTimestamp();
     }
 
     public String getInstrumentId() {
@@ -66,7 +64,6 @@ public class Contract {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
-        updateTimestamp();
     }
 
     public Double getOpenAmount() {
@@ -75,7 +72,6 @@ public class Contract {
 
     public void setOpenAmount(Double openAmount) {
         this.openAmount = openAmount;
-        updateTimestamp();
     }
 
     public ZonedDateTime getOpenTimestamp() {
@@ -84,7 +80,6 @@ public class Contract {
 
     public void setOpenTimestamp(ZonedDateTime openTimestamp) {
         this.openTimestamp = openTimestamp;
-        updateTimestamp();
     }
 
     public LocalDate getOpenTradingDay() {
@@ -93,7 +88,6 @@ public class Contract {
 
     public void setOpenTradingDay(LocalDate tradingDay) {
         this.openTradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public OrderType getOpenType() {
@@ -102,7 +96,6 @@ public class Contract {
 
     public void setOpenType(OrderType openType) {
         this.openType = openType;
-        updateTimestamp();
     }
 
     public Long getResponseId() {
@@ -111,7 +104,6 @@ public class Contract {
 
     public void setResponseId(Long responseId) {
         this.responseId = responseId;
-        updateTimestamp();
     }
 
     public ContractStatus getStatus() {
@@ -120,7 +112,14 @@ public class Contract {
 
     public void setStatus(ContractStatus status) {
         this.status = status;
-        updateTimestamp();
+    }
+
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Integer getTraderId() {
@@ -130,13 +129,4 @@ public class Contract {
     public void setTraderId(Integer traderId) {
         this.traderId = traderId;
     }
-
-    public ZonedDateTime getUpdateTimestamp() {
-        return updateTimestamp;
-    }
-
-    private void updateTimestamp() {
-        updateTimestamp = ZonedDateTime.now();
-    }
-
 }

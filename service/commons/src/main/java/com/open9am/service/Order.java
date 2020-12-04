@@ -35,6 +35,7 @@ public class Order {
     private Long orderId;
     private Double price;
     private OrderStatus status;
+    private Integer statusCode;
     private String statusMessage;
     private Long tradedVolumn;
     private Integer traderId;
@@ -52,7 +53,6 @@ public class Order {
 
     public void setAmount(Double amount) {
         this.amount = amount;
-        updateTimestamp();
     }
 
     public ZonedDateTime getCancelTimestamp() {
@@ -61,7 +61,6 @@ public class Order {
 
     public void setCancelTimestamp(ZonedDateTime cancelTimestamp) {
         this.cancelTimestamp = cancelTimestamp;
-        updateTimestamp();
     }
 
     public ZonedDateTime getInsertTimestamp() {
@@ -70,7 +69,6 @@ public class Order {
 
     public void setInsertTimestamp(ZonedDateTime insertTimestamp) {
         this.insertTimestamp = insertTimestamp;
-        updateTimestamp();
     }
 
     public String getInstrumentId() {
@@ -79,7 +77,11 @@ public class Order {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
-        updateTimestamp();
+    }
+
+    public void setIsCanceled(Boolean isCanceled) {
+        this.isCanceled = isCanceled;
+
     }
 
     public Long getOrderId() {
@@ -88,7 +90,6 @@ public class Order {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-        updateTimestamp();
     }
 
     public Double getPrice() {
@@ -97,7 +98,6 @@ public class Order {
 
     public void setPrice(Double price) {
         this.price = price;
-        updateTimestamp();
     }
 
     public OrderStatus getStatus() {
@@ -106,7 +106,14 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
-        updateTimestamp();
+    }
+
+    public Integer getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 
     public String getStatusMessage() {
@@ -115,7 +122,6 @@ public class Order {
 
     public void setStatusMessage(String statusMessage) {
         this.statusMessage = statusMessage;
-        updateTimestamp();
     }
 
     public Long getTradedVolumn() {
@@ -124,7 +130,6 @@ public class Order {
 
     public void setTradedVolumn(Long tradedVolumn) {
         this.tradedVolumn = tradedVolumn;
-        updateTimestamp();
     }
 
     public Integer getTraderId() {
@@ -141,7 +146,6 @@ public class Order {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public OrderType getType() {
@@ -150,11 +154,14 @@ public class Order {
 
     public void setType(OrderType type) {
         this.type = type;
-        updateTimestamp();
     }
 
     public ZonedDateTime getUpdateTimestamp() {
         return updateTimestamp;
+    }
+
+    public void setUpdateTimestamp(ZonedDateTime updateTimestamp) {
+        this.updateTimestamp = updateTimestamp;
     }
 
     public Long getVolumn() {
@@ -163,20 +170,10 @@ public class Order {
 
     public void setVolumn(Long volumn) {
         this.volumn = volumn;
-        updateTimestamp();
     }
 
     public Boolean isIsCanceled() {
         return isCanceled;
-    }
-
-    public void setIsCanceled(Boolean isCanceled) {
-        this.isCanceled = isCanceled;
-        updateTimestamp();
-    }
-
-    private void updateTimestamp() {
-        updateTimestamp = ZonedDateTime.now();
     }
 
 }

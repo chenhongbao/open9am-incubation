@@ -17,6 +17,7 @@
 package com.open9am.engine;
 
 import com.open9am.service.Account;
+import com.open9am.service.CancelReason;
 import com.open9am.service.CancelRequest;
 import com.open9am.service.CancelResponse;
 import com.open9am.service.Commission;
@@ -27,6 +28,7 @@ import com.open9am.service.ITraderService;
 import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.OrderRequest;
+import com.open9am.service.OrderResponse;
 import com.open9am.service.OrderStatus;
 import com.open9am.service.OrderType;
 import com.open9am.service.TraderException;
@@ -199,8 +201,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void request(CancelRequest request, int requestId) throws TraderException {
         if (request == null) {
-            throw new TraderException(ErrorCodes.REQUEST_NULL.code(),
-                                      ErrorCodes.REQUEST_NULL.message());
+            throw new TraderException(ErrorCodes.CANCEL_REQS_NULL.code(),
+                                      ErrorCodes.CANCEL_REQS_NULL.message());
         }
         forwardRequest(request, request.getTraderId(), requestId);
     }
@@ -391,8 +393,10 @@ public class TraderEngine implements ITraderEngine {
         r.setInstrumentId(request.getInstrumentId());
         r.setOrderId(orderId);
         r.setTraderId(traderId);
-        r.setTradingDay(ds.getTradingDay());
+        r.setTradingDay(rt.getTrader().getServiceInfo().getTradingDay());
         r.setUuid(Utils.getUuid().toString());
+        r.setReason(CancelReason.MARKET_CLOSE);
+        r.setStatusCode(0);
 
         try {
             h.OnCancelResponse(r);
@@ -452,7 +456,9 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.INSUFFICIENT_POSITION.message());
         }
         var r = new HashSet<Contract>(32);
-        var c = algo.getCommission(request.getPrice(), instrument);
+        var c = algo.getCommission(request.getPrice(),
+                               instrument,
+                               request.getType());
         for (int i = 0; i < request.getVolumn(); ++i) {
             var ctr = cs.get(i);
             r.add(ctr);
@@ -466,7 +472,9 @@ public class TraderEngine implements ITraderEngine {
         checkVolumn(request.getVolumn());
         var a = algo.getAmount(request.getPrice(), instrument);
         var m = algo.getMargin(request.getPrice(), instrument);
-        var c = algo.getCommission(request.getPrice(), instrument);
+        var c = algo.getCommission(request.getPrice(),
+                               instrument,
+                               request.getType());
         var total = request.getVolumn() * (m + c);
         var available = getAvailableMoney(properties);
         if (available < total) {
@@ -598,6 +606,20 @@ public class TraderEngine implements ITraderEngine {
         return (a.getBalance() - a.getMargin() - a.getFrozenMargin() - a.getFrozenCommission());
     }
 
+    private Collection<Contract> getContractsByOrderResponses(Collection<OrderResponse> rsps) throws TraderException {
+        var cs = new HashSet<Contract>(128);
+        for (var r : rsps) {
+            var s = ds.getContractsByResponseId(r.getResponseId());
+            if (s == null) {
+                throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
+                                          ErrorCodes.CONTRACT_NULL.message()
+                                          + "(Response ID:" + r.getResponseId() + ")");
+            }
+            cs.addAll(s);
+        }
+        return cs;
+    }
+
     private TraderServiceRuntime getProperTrader(OrderRequest request) throws TraderException {
         var traderId = request.getTraderId();
         if (traderId == null) {
@@ -618,6 +640,8 @@ public class TraderEngine implements ITraderEngine {
     private Account getSettledAccount(Properties properties)
             throws DataSourceException, TraderEngineAlgorithmException {
         return algo.getAccount(ds.getAccount(),
+                               ds.getDeposits(),
+                               ds.getWithdraws(),
                                algo.getPositions(ds.getContracts(),
                                                  ds.getCommissions(),
                                                  ds.getMargins(),
@@ -806,16 +830,31 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.ORDER_REQS_NULL.message());
         }
         for (var r : rs) {
-            var rsps = ds.getOrderResponsesByOrderId(r.getOrderId());
+            var orderId = r.getOrderId();
+            if (orderId == null) {
+                throw new TraderException(ErrorCodes.ORDER_ID_NULL.code(),
+                                          ErrorCodes.ORDER_ID_NULL.message());
+            }
+            var rsps = ds.getOrderResponsesByOrderId(orderId);
             if (rsps == null) {
                 throw new TraderException(ErrorCodes.ORDER_RSPS_NULL.code(),
                                           ErrorCodes.ORDER_RSPS_NULL.message());
+            }
+            var ctrs = getContractsByOrderResponses(rsps);
+            if (ctrs == null) {
+                throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
+                                          ErrorCodes.CONTRACT_NULL.message());
 
             }
-            var o = algo.getOrder(r, rsps);
+            var cals = ds.getCancelResponseByOrderId(r.getOrderId());
+            if (cals == null) {
+                throw new TraderException(ErrorCodes.CANCEL_RSPS_NULL.code(),
+                                          ErrorCodes.CANCEL_RSPS_NULL.message());
+
+            }
+            var o = algo.getOrder(r, ctrs, rsps, cals);
             var s = o.getStatus();
             if (s == OrderStatus.ACCEPTED
-                || s == OrderStatus.ACCEPTED_REMOTE
                 || s == OrderStatus.PART_TRADED_INQUE
                 || s == OrderStatus.PART_TRADED_NOQUE) {
                 cancelOrderRequest(r);

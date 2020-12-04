@@ -45,7 +45,6 @@ public class Margin {
 
     public void setContractId(Long contractId) {
         this.contractId = contractId;
-        updateTimestamp();
     }
 
     public Double getMargin() {
@@ -54,7 +53,6 @@ public class Margin {
 
     public void setMargin(Double margin) {
         this.margin = margin;
-        updateTimestamp();
     }
 
     public Long getMarginId() {
@@ -63,7 +61,6 @@ public class Margin {
 
     public void setMarginId(Long marginId) {
         this.marginId = marginId;
-        updateTimestamp();
     }
 
     public Long getOrderId() {
@@ -80,7 +77,14 @@ public class Margin {
 
     public void setStatus(FeeStatus status) {
         this.status = status;
-        updateTimestamp();
+    }
+
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public LocalDate getTradingDay() {
@@ -89,7 +93,6 @@ public class Margin {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public OrderType getType() {
@@ -98,15 +101,5 @@ public class Margin {
 
     public void setType(OrderType type) {
         this.type = type;
-        updateTimestamp();
     }
-
-    public ZonedDateTime getUpdateTime() {
-        return timestamp;
-    }
-
-    private void updateTimestamp() {
-        timestamp = ZonedDateTime.now();
-    }
-
 }

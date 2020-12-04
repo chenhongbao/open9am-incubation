@@ -45,7 +45,6 @@ public class Commission {
 
     public void setCommission(Double commission) {
         this.commission = commission;
-        updateTimestamp();
     }
 
     public Long getCommissionId() {
@@ -54,7 +53,6 @@ public class Commission {
 
     public void setCommissionId(Long commissionId) {
         this.commissionId = commissionId;
-        updateTimestamp();
     }
 
     public Long getContractId() {
@@ -63,7 +61,6 @@ public class Commission {
 
     public void setContractId(Long contractId) {
         this.contractId = contractId;
-        updateTimestamp();
     }
 
     public Long getOrderId() {
@@ -80,7 +77,14 @@ public class Commission {
 
     public void setStatus(FeeStatus status) {
         this.status = status;
-        updateTimestamp();
+    }
+
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public LocalDate getTradingDay() {
@@ -89,7 +93,6 @@ public class Commission {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public OrderType getType() {
@@ -98,15 +101,6 @@ public class Commission {
 
     public void setType(OrderType type) {
         this.type = type;
-        updateTimestamp();
-    }
-
-    public ZonedDateTime getUpdateTime() {
-        return timestamp;
-    }
-
-    private void updateTimestamp() {
-        timestamp = ZonedDateTime.now();
     }
 
 }

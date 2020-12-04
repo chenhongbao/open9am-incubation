@@ -24,7 +24,8 @@ package com.open9am.service;
  */
 public enum FeeStatus {
     FORZEN(0x20),
-    DEALED(0x21);
+    DEALED(0x21),
+    REMOVED(0x22);
 
     private final int code;
 

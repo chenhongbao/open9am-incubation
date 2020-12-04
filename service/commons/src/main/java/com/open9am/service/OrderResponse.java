@@ -48,7 +48,6 @@ public class OrderResponse {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
-        updateTimestamp();
     }
 
     public Long getOrderId() {
@@ -57,7 +56,6 @@ public class OrderResponse {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-        updateTimestamp();
     }
 
     public Double getPrice() {
@@ -66,7 +64,6 @@ public class OrderResponse {
 
     public void setPrice(Double price) {
         this.price = price;
-        updateTimestamp();
     }
 
     public Long getResponseId() {
@@ -75,11 +72,14 @@ public class OrderResponse {
 
     public void setResponseId(Long responseId) {
         this.responseId = responseId;
-        updateTimestamp();
     }
 
     public ZonedDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(ZonedDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     public Integer getTraderId() {
@@ -88,7 +88,6 @@ public class OrderResponse {
 
     public void setTraderId(Integer traderId) {
         this.traderId = traderId;
-        updateTimestamp();
     }
 
     public LocalDate getTradingDay() {
@@ -97,7 +96,6 @@ public class OrderResponse {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-        updateTimestamp();
     }
 
     public OrderType getType() {
@@ -106,7 +104,6 @@ public class OrderResponse {
 
     public void setType(OrderType type) {
         this.type = type;
-        updateTimestamp();
     }
 
     public String getUuid() {
@@ -115,7 +112,6 @@ public class OrderResponse {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-        updateTimestamp();
     }
 
     public Long getVolumn() {
@@ -124,11 +120,6 @@ public class OrderResponse {
 
     public void setVolumn(Long volumn) {
         this.volumn = volumn;
-        updateTimestamp();
-    }
-
-    private void updateTimestamp() {
-        timestamp = ZonedDateTime.now();
     }
 
 }
