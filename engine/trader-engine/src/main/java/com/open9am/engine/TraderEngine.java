@@ -133,7 +133,8 @@ public class TraderEngine implements ITraderEngine {
         try {
             check0();
             settle(ds, algo);
-            ds.updateAccount(getSettledAccount(properties));
+            var conn = ds.getConnection();
+            conn.updateAccount(getSettledAccount(properties));
             changeStatus(EngineStatus.WORKING);
         }
         catch (TraderException e) {
@@ -162,8 +163,9 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.DATASOURCE_NULL.message());
         }
         try {
-            initAccount(ds.getAccount());
-            initContracts(ds.getContractsByStatus(ContractStatus.CLOSED));
+            var conn = ds.getConnection();
+            initAccount(conn.getAccount());
+            initContracts(conn.getContractsByStatus(ContractStatus.CLOSED), conn);
             changeStatus(EngineStatus.WORKING);
         }
         catch (TraderException e) {
@@ -554,7 +556,6 @@ public class TraderEngine implements ITraderEngine {
         var rt = getProperTrader(request);
         if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
             request.setTraderId(rt.getTraderId());
-            Loggers.get().debug("Route order({}) to trader({}).", request.getOrderId(), rt.getTraderId());
         }
     }
 
@@ -627,7 +628,8 @@ public class TraderEngine implements ITraderEngine {
     }
 
     private List<Contract> getAvailableContracts(OrderRequest request) throws TraderException {
-        var cs = ds.getContractsByInstrumentId(request.getInstrumentId());
+        var conn = ds.getConnection();
+        var cs = conn.getContractsByInstrumentId(request.getInstrumentId());
         if (cs == null) {
             throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
                                       ErrorCodes.CONTRACT_NULL.message());
@@ -653,8 +655,9 @@ public class TraderEngine implements ITraderEngine {
 
     private Collection<Contract> getContractsByOrderResponses(Collection<OrderResponse> rsps) throws TraderException {
         var cs = new HashSet<Contract>(128);
+        var conn = ds.getConnection();
         for (var r : rsps) {
-            var s = ds.getContractsByResponseId(r.getResponseId());
+            var s = conn.getContractsByResponseId(r.getResponseId());
             if (s == null) {
                 throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
                                           ErrorCodes.CONTRACT_NULL.message()
@@ -684,19 +687,21 @@ public class TraderEngine implements ITraderEngine {
 
     private Account getSettledAccount(Properties properties)
             throws DataSourceException, TraderEngineAlgorithmException {
-        return algo.getAccount(ds.getAccount(),
-                               ds.getDeposits(),
-                               ds.getWithdraws(),
-                               algo.getPositions(ds.getContracts(),
-                                                 ds.getCommissions(),
-                                                 ds.getMargins(),
+        final var conn = ds.getConnection();
+        return algo.getAccount(conn.getAccount(),
+                               conn.getDeposits(),
+                               conn.getWithdraws(),
+                               algo.getPositions(conn.getContracts(),
+                                                 conn.getCommissions(),
+                                                 conn.getMargins(),
                                                  properties));
     }
 
     private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {
         final var today = new HashMap<Integer, OrderRequest>(64);
         final var yd = new HashMap<Integer, OrderRequest>(64);
-        var tradingDay = ds.getTradingDay();
+        final var conn = ds.getConnection();
+        var tradingDay = conn.getTradingDay();
         for (var c : cs) {
             if (c.getOpenTradingDay().isBefore(tradingDay)) {
                 var o = yd.computeIfAbsent(c.getTraderId(), k -> {
@@ -753,6 +758,8 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.ACCOUNT_NULL.message());
         }
         callOnErasedAccount(a);
+        final var conn = ds.getConnection();
+        final var tradingDay = conn.getTradingDay();
 
         a.setPreBalance(a.getBalance());
         a.setPreDeposit(a.getDeposit());
@@ -762,30 +769,33 @@ public class TraderEngine implements ITraderEngine {
         a.setDeposit(0.0D);
         a.setMargin(0.0D);
         a.setWithdraw(0.0D);
-        a.setTradingDay(ds.getTradingDay());
+        a.setTradingDay(tradingDay);
 
-        ds.updateAccount(a);
+        conn.updateAccount(a);
     }
 
-    private void initContracts(Collection<Contract> cs) throws TraderException {
+    private void initContracts(Collection<Contract> cs, IDataConnection conn) throws TraderException {
         if (cs == null) {
             throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
                                       ErrorCodes.CONTRACT_NULL.message());
         }
         callOnErasedContracts(cs);
         for (var c : cs) {
-            ds.removeContract(c.getContractId());
+            conn.removeContract(c.getContractId());
         }
     }
 
     private void setFrozenClose(double cm, Contract c, OrderType type) throws DataSourceException, TraderException {
+        IDataConnection conn = null;
         try {
-            ds.transaction();
+            conn = ds.getConnection();
+            final var tradingDay = conn.getTradingDay();
+            conn.transaction();
             /*
              * Update contracts status to make it frozen.
              */
             c.setStatus(ContractStatus.CLOSING);
-            ds.updateContract(c);
+            conn.updateContract(c);
             /*
              * Add new commission for the current order, and make it frozen
              * before order is filled.
@@ -795,19 +805,21 @@ public class TraderEngine implements ITraderEngine {
             cms.setCommissionId(Utils.getId());
             cms.setContractId(c.getContractId());
             cms.setStatus(FeeStatus.FORZEN);
-            cms.setTradingDay(ds.getTradingDay());
+            cms.setTradingDay(tradingDay);
             cms.setType(type);
-            ds.addCommission(cms);
+            conn.addCommission(cms);
             /*
              * Commit change.
              */
-            ds.commit();
+            conn.commit();
         }
         catch (DataSourceException e) {
             /*
              * Rollback data source.
              */
-            ds.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             throw e;
         }
     }
@@ -816,8 +828,11 @@ public class TraderEngine implements ITraderEngine {
                                double margin,
                                double commission,
                                OrderRequest request) throws DataSourceException {
+        IDataConnection conn = null;
         try {
-            ds.transaction();
+            conn = ds.getConnection();
+            final var tradingDay = conn.getTradingDay();
+            conn.transaction();
             /*
              * Add preparing contract.
              */
@@ -826,10 +841,10 @@ public class TraderEngine implements ITraderEngine {
             ctr.setTraderId(request.getTraderId());
             ctr.setInstrumentId(request.getInstrumentId());
             ctr.setOpenAmount(amount);
-            ctr.setOpenTradingDay(ds.getTradingDay());
+            ctr.setOpenTradingDay(tradingDay);
             ctr.setOpenType(request.getType());
             ctr.setStatus(ContractStatus.OPENING);
-            ds.addContract(ctr);
+            conn.addContract(ctr);
             /*
              * Add frozen margin.
              */
@@ -839,9 +854,9 @@ public class TraderEngine implements ITraderEngine {
             cmn.setContractId(ctr.getContractId());
             cmn.setOrderId(request.getOrderId());
             cmn.setStatus(FeeStatus.FORZEN);
-            cmn.setTradingDay(ds.getTradingDay());
+            cmn.setTradingDay(tradingDay);
             cmn.setType(request.getType());
-            ds.addCommission(cmn);
+            conn.addCommission(cmn);
             /*
              * Add frozen commission.
              */
@@ -851,25 +866,28 @@ public class TraderEngine implements ITraderEngine {
             mn.setMarginId(Utils.getId());
             mn.setOrderId(request.getOrderId());
             mn.setStatus(FeeStatus.FORZEN);
-            mn.setTradingDay(ds.getTradingDay());
+            mn.setTradingDay(tradingDay);
             mn.setType(request.getType());
-            ds.addMargin(mn);
+            conn.addMargin(mn);
             /*
              * Commit change.
              */
-            ds.commit();
+            conn.commit();
         }
         catch (DataSourceException e) {
             /*
              * Rollback on exception.
              */
-            ds.rollback();
+            if (conn != null) {
+                conn.rollback();
+            }
             throw e;
         }
     }
 
     private void settle(IDataSource ds, ITraderEngineAlgorithm algo) throws TraderException {
-        var rs = ds.getOrderRequests();
+        final var conn = ds.getConnection();
+        var rs = conn.getOrderRequests();
         if (rs == null) {
             throw new TraderException(ErrorCodes.ORDER_REQS_NULL.code(),
                                       ErrorCodes.ORDER_REQS_NULL.message());
@@ -880,7 +898,7 @@ public class TraderEngine implements ITraderEngine {
                 throw new TraderException(ErrorCodes.ORDER_ID_NULL.code(),
                                           ErrorCodes.ORDER_ID_NULL.message());
             }
-            var rsps = ds.getOrderResponsesByOrderId(orderId);
+            var rsps = conn.getOrderResponsesByOrderId(orderId);
             if (rsps == null) {
                 throw new TraderException(ErrorCodes.ORDER_RSPS_NULL.code(),
                                           ErrorCodes.ORDER_RSPS_NULL.message());
@@ -891,7 +909,7 @@ public class TraderEngine implements ITraderEngine {
                                           ErrorCodes.CONTRACT_NULL.message());
 
             }
-            var cals = ds.getCancelResponseByOrderId(r.getOrderId());
+            var cals = conn.getCancelResponseByOrderId(r.getOrderId());
             if (cals == null) {
                 throw new TraderException(ErrorCodes.CANCEL_RSPS_NULL.code(),
                                           ErrorCodes.CANCEL_RSPS_NULL.message());

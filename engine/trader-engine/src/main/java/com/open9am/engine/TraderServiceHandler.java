@@ -52,19 +52,19 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
     public void OnCancelResponse(CancelResponse response) {
-        IDataSource ds = null;
+        IDataConnection conn = null;
         try {
             preprocess(response);
             /*
              * Get data source and start transaction.
              */
-            ds = getDataSource();
-            ds.transaction();
+            conn = getDataSource().getConnection();
+            conn.transaction();
             /*
              * Add cancel response.
              */
-            ds.addCancelResponse(response);
-            var o = ds.getOrderRequestById(response.getOrderId());
+            conn.addCancelResponse(response);
+            var o = conn.getOrderRequestById(response.getOrderId());
             if (o == null) {
                 throw new TraderRuntimeException(ErrorCodes.ORDER_ID_NOT_FOUND.code(),
                                                  ErrorCodes.ORDER_ID_NOT_FOUND.message());
@@ -74,7 +74,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 /*
                  * Cancel opening order.
                  */
-                var bs = getFrozenBundles(response.getOrderId(), ds);
+                var bs = getFrozenBundles(response.getOrderId(), conn);
                 for (var b : bs) {
                     var s = b.getContract().getStatus();
                     if (s != ContractStatus.OPENING) {
@@ -83,14 +83,14 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                     cancelOpen(b.getCommission(),
                                b.getMargin(),
                                b.getContract(),
-                               ds);
+                               conn);
                 }
             }
             else {
                 /*
                  * Cancel closing order.
                  */
-                var bs = getFrozenBundles(response.getOrderId(), ds);
+                var bs = getFrozenBundles(response.getOrderId(), conn);
                 for (var b : bs) {
                     var s = b.getContract().getStatus();
                     if (s != ContractStatus.CLOSING) {
@@ -98,22 +98,22 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                     }
                     cancelClose(b.getCommission(),
                                 b.getContract(),
-                                ds);
+                                conn);
                 }
             }
-            ds.commit();
+            conn.commit();
         }
         catch (TraderException e) {
-            if (ds != null) {
-                rollback(ds);
+            if (conn != null) {
+                rollback(conn);
             }
             callOnException(new TraderRuntimeException(e.getCode(),
                                                        e.getMessage(),
                                                        e));
         }
         catch (TraderRuntimeException e) {
-            if (ds != null) {
-                rollback(ds);
+            if (conn != null) {
+                rollback(conn);
             }
             callOnException(e);
         }
@@ -181,25 +181,25 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
     public void OnOrderReponse(OrderResponse response) {
-        IDataSource ds = null;
+        IDataConnection conn = null;
         try {
             preprocess(response);
             /*
              * Get data source and start transaction.
              */
-            ds = getDataSource();
-            ds.transaction();
+            conn = getDataSource().getConnection();
+            conn.transaction();
             /*
              * Add order response. Please note that volumn in response could be
              * zero, notifying a status change of the inserted order request.
              */
-            ds.addOrderResponse(response);
+            conn.addOrderResponse(response);
             var type = response.getType();
             if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
                 /*
                  * Deal opening order.
                  */
-                var bs = getFrozenBundles(response.getOrderId(), ds);
+                var bs = getFrozenBundles(response.getOrderId(), conn);
                 int count = 0;
                 var it = bs.iterator();
                 while (count < response.getVolumn() && it.hasNext()) {
@@ -212,7 +212,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                              b.getMargin(),
                              b.getContract(),
                              response,
-                             ds
+                             conn
                     );
                     ++count;
                 }
@@ -225,7 +225,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 /*
                  * Deal closing order.
                  */
-                var bs = getFrozenBundles(response.getOrderId(), ds);
+                var bs = getFrozenBundles(response.getOrderId(), conn);
                 int count = 0;
                 var it = bs.iterator();
                 while (count < response.getVolumn() && it.hasNext()) {
@@ -238,7 +238,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                               b.getMargin(),
                               b.getContract(),
                               response,
-                              ds);
+                              conn);
                     ++count;
                 }
                 if (count < response.getVolumn()) {
@@ -246,19 +246,19 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                                                      ErrorCodes.INCONSISTENT_FROZEN_INFO.message());
                 }
             }
-            ds.commit();
+            conn.commit();
         }
         catch (TraderException e) {
-            if (ds != null) {
-                rollback(ds);
+            if (conn != null) {
+                rollback(conn);
             }
             callOnException(new TraderRuntimeException(e.getCode(),
                                                        e.getMessage(),
                                                        e));
         }
         catch (TraderRuntimeException e) {
-            if (ds != null) {
-                rollback(ds);
+            if (conn != null) {
+                rollback(conn);
             }
             callOnException(e);
         }
@@ -371,23 +371,23 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     private void cancelClose(Commission commission,
                              Contract contract,
-                             IDataSource ds) throws DataSourceException {
+                             IDataConnection conn) throws DataSourceException {
         requireStatus(contract, ContractStatus.CLOSING);
         contract.setStatus(ContractStatus.OPEN);
-        ds.updateContract(contract);
-        ds.removeCommission(commission.getCommissionId());
+        conn.updateContract(contract);
+        conn.removeCommission(commission.getCommissionId());
     }
 
     private void cancelOpen(Commission commission,
                             Margin margin,
                             Contract contract,
-                            IDataSource ds) throws DataSourceException {
+                            IDataConnection conn) throws DataSourceException {
         requireStatus(commission, FeeStatus.FORZEN);
         requireStatus(margin, FeeStatus.FORZEN);
         requireStatus(contract, ContractStatus.OPENING);
-        ds.removeContract(contract.getContractId());
-        ds.removeCommission(commission.getCommissionId());
-        ds.removeMargin(margin.getMarginId());
+        conn.removeContract(contract.getContractId());
+        conn.removeCommission(commission.getCommissionId());
+        conn.removeMargin(margin.getMarginId());
 
     }
 
@@ -439,7 +439,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                            Margin margin,
                            Contract contract,
                            OrderResponse response,
-                           IDataSource ds) throws TraderException {
+                           IDataConnection conn) throws TraderException {
         requireStatus(commission, FeeStatus.FORZEN);
         requireStatus(margin, FeeStatus.DEALED);
         requireStatus(contract, ContractStatus.CLOSING);
@@ -447,12 +447,12 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
          * Update commission.
          */
         commission.setStatus(FeeStatus.DEALED);
-        ds.updateCommission(commission);
+        conn.updateCommission(commission);
         /*
          * Update margin.
          */
         margin.setStatus(FeeStatus.REMOVED);
-        ds.updateMargin(margin);
+        conn.updateMargin(margin);
         /*
          * Update contract.
          */
@@ -461,14 +461,14 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         var amount = info.getEngine().getAlgorithm().getAmount(price, instrument);
         contract.setCloseAmount(amount);
         contract.setStatus(ContractStatus.CLOSED);
-        ds.updateContract(contract);
+        conn.updateContract(contract);
     }
 
     private void dealOpen(Commission commission,
                           Margin margin,
                           Contract contract,
                           OrderResponse response,
-                          IDataSource ds) throws TraderException {
+                          IDataConnection conn) throws TraderException {
         requireStatus(commission, FeeStatus.FORZEN);
         requireStatus(margin, FeeStatus.FORZEN);
         requireStatus(contract, ContractStatus.OPENING);
@@ -476,12 +476,12 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
          * Update commission.
          */
         commission.setStatus(FeeStatus.DEALED);
-        ds.updateCommission(commission);
+        conn.updateCommission(commission);
         /*
          * Update margin.
          */
         margin.setStatus(FeeStatus.DEALED);
-        ds.updateMargin(margin);
+        conn.updateMargin(margin);
         /*
          * Update contract.
          */
@@ -493,7 +493,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         contract.setResponseId(response.getResponseId());
         contract.setOpenTimestamp(response.getTimestamp());
         contract.setOpenTradingDay(response.getTradingDay());
-        ds.updateCommission(commission);
+        conn.updateCommission(commission);
     }
 
     private IDataSource getDataSource() throws TraderException {
@@ -505,16 +505,16 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         return ds;
     }
 
-    private Collection<FrozenBundle> getFrozenBundles(Long orderId, IDataSource ds) throws DataSourceException {
+    private Collection<FrozenBundle> getFrozenBundles(Long orderId, IDataConnection conn) throws DataSourceException {
         final var map = new HashMap<Long, FrozenBundle>(128);
-        var ms = ds.getMarginsByOrderId(orderId);
+        var ms = conn.getMarginsByOrderId(orderId);
         checkMarginsNull(ms);
-        var cs = ds.getCommissionsByOrderId(orderId);
+        var cs = conn.getCommissionsByOrderId(orderId);
         checkCommissionsNull(cs);
         for (var c : cs) {
             var cid = c.getContractId();
             checkContractIdNull(cid);
-            var cc = ds.getContractById(cid);
+            var cc = conn.getContractById(cid);
             checkContractNull(cc);
             var m = getMarginByContractId(cid, ms);
             checkMarginNull(m);
@@ -625,9 +625,9 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
     }
 
-    private void rollback(IDataSource ds) {
+    private void rollback(IDataConnection conn) {
         try {
-            ds.rollback();
+            conn.rollback();
         }
         catch (DataSourceException ex) {
             callOnException(new TraderRuntimeException(
