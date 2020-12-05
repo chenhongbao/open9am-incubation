@@ -47,21 +47,30 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TraderEngine implements ITraderEngine {
 
-    private final ITraderEngineAlgorithm algo;
+    private ITraderEngineAlgorithm algo;
     private IDataSource ds;
     private final Properties globalStartProps;
-    private ITraderEngineHandler handler;
+    private final ConcurrentHashMap<ITraderEngineHandler, Object> handlers;
     private final ConcurrentHashMap<String, Instrument> instruments;
     private final ConcurrentHashMap<Long, Integer> orderTraders;
     private EngineStatus status;
     private final ConcurrentHashMap<Integer, ExtendedTraderServiceRuntime> traders;
 
-    public TraderEngine(ITraderEngineAlgorithm algorithm) {
-        algo = algorithm;
+    public TraderEngine() {
+        handlers = new ConcurrentHashMap<>(32);
         traders = new ConcurrentHashMap<>(32);
         orderTraders = new ConcurrentHashMap<>(1024);
         instruments = new ConcurrentHashMap<>(512);
         globalStartProps = new Properties();
+    }
+
+    @Override
+    public void addHandler(ITraderEngineHandler handler) throws TraderException {
+        if (handler == null) {
+            throw new TraderException(ErrorCodes.TRADER_ENGINE_HANDLER_NULL.code(),
+                                      ErrorCodes.TRADER_ENGINE_HANDLER_NULL.message());
+        }
+        handlers.put(handler, new Object());
     }
 
     @Override
@@ -76,6 +85,15 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
+    public void setAlgorithm(ITraderEngineAlgorithm algo) throws TraderException {
+        if (algo == null) {
+            throw new TraderException(ErrorCodes.ALGORITHM_NULL.code(),
+                                      ErrorCodes.ALGORITHM_NULL.message());
+        }
+        this.algo = algo;
+    }
+
+    @Override
     public IDataSource getDataSource() {
         return ds;
     }
@@ -87,11 +105,6 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.DATASOURCE_NULL.message());
         }
         ds = dataSource;
-    }
-
-    @Override
-    public ITraderEngineHandler getHandler() {
-        return handler;
     }
 
     @Override
@@ -136,6 +149,11 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
+    public Collection<ITraderEngineHandler> handlers() {
+        return handlers.keySet();
+    }
+
+    @Override
     public void initialize(Properties properties) throws TraderException {
         changeStatus(EngineStatus.INITIALIZING);
         if (ds == null) {
@@ -171,6 +189,15 @@ public class TraderEngine implements ITraderEngine {
                                       ErrorCodes.TRADER_ID_DUPLICATED.message());
         }
         addTrader(traderId, trader);
+    }
+
+    @Override
+    public void removeHanlder(ITraderEngineHandler handler) throws TraderException {
+        if (handler == null) {
+            throw new TraderException(ErrorCodes.TRADER_ENGINE_HANDLER_NULL.code(),
+                                      ErrorCodes.TRADER_ENGINE_HANDLER_NULL.message());
+        }
+        handlers.remove(handler);
     }
 
     @Override
@@ -223,14 +250,13 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
-    public void start(Properties properties, ITraderEngineHandler handler) throws TraderException {
+    public void start(Properties properties) throws TraderException {
         changeStatus(EngineStatus.STARTING);
         try {
             globalStartProps.clear();
             if (properties != null) {
                 globalStartProps.putAll(properties);
             }
-            this.handler = handler;
             for (var p : traders.entrySet()) {
                 startEach(p.getKey(), p.getValue());
             }
@@ -288,13 +314,16 @@ public class TraderEngine implements ITraderEngine {
     }
 
     private void callOnErasedAccount(Account a) {
-        if (handler != null) {
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.keySet().parallelStream().forEach(h -> {
             try {
-                handler.OnErasingAccount(a);
+                h.OnErasingAccount(a);
             }
             catch (Throwable th) {
                 try {
-                    handler.OnException(new TraderRuntimeException(
+                    h.OnException(new TraderRuntimeException(
                             ErrorCodes.USER_CODE_ERROR.code(),
                             ErrorCodes.USER_CODE_ERROR.message(),
                             th));
@@ -302,17 +331,20 @@ public class TraderEngine implements ITraderEngine {
                 catch (Throwable ignored) {
                 }
             }
-        }
+        });
     }
 
     private void callOnErasedContracts(Collection<Contract> cs) {
-        if (handler != null) {
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.keySet().parallelStream().forEach(h -> {
             try {
-                handler.OnErasingContracts(cs);
+                h.OnErasingContracts(cs);
             }
             catch (Throwable th) {
                 try {
-                    handler.OnException(new TraderRuntimeException(
+                    h.OnException(new TraderRuntimeException(
                             ErrorCodes.USER_CODE_ERROR.code(),
                             ErrorCodes.USER_CODE_ERROR.message(),
                             th));
@@ -320,7 +352,7 @@ public class TraderEngine implements ITraderEngine {
                 catch (Throwable ignored) {
                 }
             }
-        }
+        });
     }
 
     /*
@@ -328,13 +360,16 @@ public class TraderEngine implements ITraderEngine {
      * tell user the handling is wrong.
      */
     private void callOnException(TraderRuntimeException e) {
-        if (handler != null) {
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.keySet().parallelStream().forEach(h -> {
             try {
-                handler.OnException(e);
+                h.OnException(e);
             }
             catch (Throwable th) {
                 try {
-                    handler.OnException(new TraderRuntimeException(
+                    h.OnException(new TraderRuntimeException(
                             ErrorCodes.USER_CODE_ERROR.code(),
                             ErrorCodes.USER_CODE_ERROR.message(),
                             th));
@@ -342,18 +377,28 @@ public class TraderEngine implements ITraderEngine {
                 catch (Throwable ignored) {
                 }
             }
-        }
+        });
     }
 
     private void callOnStatusChange() {
-        try {
-            handler.OnStatusChange(status);
+        if (handlers.isEmpty()) {
+            return;
         }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
-        }
+        handlers.keySet().parallelStream().forEach(h -> {
+            try {
+                h.OnStatusChange(status);
+            }
+            catch (Throwable th) {
+                try {
+                    callOnException(new TraderRuntimeException(
+                            ErrorCodes.USER_CODE_ERROR.code(),
+                            ErrorCodes.USER_CODE_ERROR.message(),
+                            th));
+                }
+                catch (Throwable ignored) {
+                }
+            }
+        });
     }
 
     private boolean canClose(Contract c, OrderRequest request) throws TraderException {

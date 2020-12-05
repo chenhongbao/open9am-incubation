@@ -117,26 +117,26 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             }
             callOnException(e);
         }
-        try {
-            info.getEngine().getHandler().OnCancelResponse(response);
-        }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
-        }
+        callOnCanceResponse(response);
     }
 
     @Override
+
     public void OnException(TraderRuntimeException exception) {
-        try {
-            info.getEngine().getHandler().OnException(exception);
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
         }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
-        }
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnException(exception);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
     }
 
     @Override
@@ -155,9 +155,9 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             /*
              * Call user handler.
              */
-            info.getEngine().getHandler().OnException(request,
-                                                      exception,
-                                                      requestId);
+            callOnOrderException(request,
+                                 exception,
+                                 requestId);
         }
         catch (Throwable th) {
             callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
@@ -167,20 +167,16 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public void OnException(CancelRequest request, TraderRuntimeException exception, int requestId) {
-        try {
-            info.getEngine().getHandler().OnException(request,
-                                                      exception,
-                                                      requestId);
-            /*
-             * Cancel failed, the order status is not changed.
-             */
-        }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
-        }
+
+    public void OnException(CancelRequest request,
+                            TraderRuntimeException exception,
+                            int requestId) {
+        callOnCancelException(request,
+                              exception,
+                              requestId);
+        /*
+         * Cancel failed, the order status is not changed.
+         */
     }
 
     @Override
@@ -266,27 +262,64 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             }
             callOnException(e);
         }
-        try {
-            info.getEngine().getHandler().OnOrderReponse(response);
-        }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
-        }
+        callOnOrderResponse(response);
     }
 
     @Override
     public void OnStatusChange(int status) {
         Loggers.get().debug("Trader service status: {}.", status);
-        try {
-            info.getEngine().getHandler().OnTraderServiceStatusChange(status);
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
         }
-        catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
-                                                       th));
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnTraderServiceStatusChange(status);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
+    }
+
+    private void callOnCanceResponse(CancelResponse response) {
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
         }
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnCancelResponse(response);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
+    }
+
+    private void callOnCancelException(CancelRequest request,
+                                       TraderRuntimeException exception,
+                                       int requestId) {
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnException(request,
+                              exception,
+                              requestId);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
     }
 
     private void callOnException(TraderRuntimeException e) {
@@ -296,6 +329,44 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         catch (Throwable th) {
             Loggers.get().error("Calling OnExcepion() throws exception.", th);
         }
+    }
+
+    private void callOnOrderException(OrderRequest request,
+                                      TraderRuntimeException exception,
+                                      int requestId) {
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnException(request,
+                              exception,
+                              requestId);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
+    }
+
+    private void callOnOrderResponse(OrderResponse response) {
+        var handlers = info.getEngine().handlers();
+        if (handlers.isEmpty()) {
+            return;
+        }
+        handlers.parallelStream().forEach(h -> {
+            try {
+                h.OnOrderReponse(response);
+            }
+            catch (Throwable th) {
+                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
+                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                                                           th));
+            }
+        });
     }
 
     private void cancelClose(Commission commission,

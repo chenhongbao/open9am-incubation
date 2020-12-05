@@ -44,7 +44,11 @@ public interface ITraderEngine {
 
     void setStartProperties(int traderId, Properties properties) throws TraderException;
 
-    void start(Properties properties, ITraderEngineHandler handler) throws TraderException;
+    void addHandler(ITraderEngineHandler handler) throws TraderException;
+
+    void removeHanlder(ITraderEngineHandler handler) throws TraderException;
+
+    void start(Properties properties) throws TraderException;
 
     void stop() throws TraderException;
 
@@ -66,9 +70,11 @@ public interface ITraderEngine {
 
     IDataSource getDataSource();
 
+    void setAlgorithm(ITraderEngineAlgorithm algo) throws TraderException;
+
     ITraderEngineAlgorithm getAlgorithm();
 
-    ITraderEngineHandler getHandler();
+    Collection<ITraderEngineHandler> handlers();
 
     Instrument getRelatedInstrument(String instrumentId) throws TraderException;
 }

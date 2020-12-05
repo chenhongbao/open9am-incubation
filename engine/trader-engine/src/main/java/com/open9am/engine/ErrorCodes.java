@@ -84,7 +84,8 @@ public enum ErrorCodes {
     POSITION_NULL(0x0000003C, "Position(s) null."),
     POSITION_FIELD_NULL(0x0000003D, "Position field(s) null."),
     COMMISSION_AMOUNT_NULL(0x0000003E, "Commission amount null."),
-    INVALID_FEE_STATUS(0x0000003F, "Invalid fee status.");
+    INVALID_FEE_STATUS(0x0000003F, "Invalid fee status."),
+    TRADER_ENGINE_HANDLER_NULL(0x00000040, "Trader engine handler null.");
 
     private final int code;
     private final String message;
