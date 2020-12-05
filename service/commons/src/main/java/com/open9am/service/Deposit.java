@@ -16,6 +16,7 @@ import java.time.ZonedDateTime;
 public class Deposit {
 
     private Double amount;
+    private Long depositId;
     private ZonedDateTime timestamp;
     private LocalDate tradingDay;
 
@@ -28,6 +29,14 @@ public class Deposit {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public Long getDepositId() {
+        return depositId;
+    }
+
+    public void setDepositId(Long depositId) {
+        this.depositId = depositId;
     }
 
     public ZonedDateTime getTimestamp() {
