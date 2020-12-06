@@ -267,7 +267,6 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
     public void OnStatusChange(int status) {
-        Loggers.get().debug("Trader service status: {}.", status);
         var handlers = info.getEngine().handlers();
         if (handlers.isEmpty()) {
             return;
@@ -326,8 +325,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         try {
             OnException(e);
         }
-        catch (Throwable th) {
-            Loggers.get().error("Calling OnExcepion() throws exception.", th);
+        catch (Throwable ignored) {
         }
     }
 
