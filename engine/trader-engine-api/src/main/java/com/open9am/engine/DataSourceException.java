@@ -30,4 +30,8 @@ public class DataSourceException extends TraderException {
         super(code, message);
     }
 
+    public DataSourceException(int code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
 }

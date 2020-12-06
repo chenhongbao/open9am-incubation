@@ -909,7 +909,7 @@ public class TraderEngine implements ITraderEngine {
                                           ErrorCodes.CONTRACT_NULL.message());
 
             }
-            var cals = conn.getCancelResponseByOrderId(r.getOrderId());
+            var cals = conn.getCancelResponseByOrderId(orderId);
             if (cals == null) {
                 throw new TraderException(ErrorCodes.CANCEL_RSPS_NULL.code(),
                                           ErrorCodes.CANCEL_RSPS_NULL.message());

@@ -85,7 +85,12 @@ public enum ErrorCodes {
     POSITION_FIELD_NULL(0x0000003D, "Position field(s) null."),
     COMMISSION_AMOUNT_NULL(0x0000003E, "Commission amount null."),
     INVALID_FEE_STATUS(0x0000003F, "Invalid fee status."),
-    TRADER_ENGINE_HANDLER_NULL(0x00000040, "Trader engine handler null.");
+    TRADER_ENGINE_HANDLER_NULL(0x00000040, "Trader engine handler null."),
+    DATA_CONNECTION_NULL(0x00000041, "Data connection null."),
+    TRANSACTION_COMMIT_FAILED(0x00000042, "Transaction commit failed."),
+    TRANSACTION_BEGIN_FAILED(0x00000043, "JDBC transaction begin failed."),
+    TRANSACTION_RESTORE_FAILED(0x00000044, "JDBC transaction store failed."),
+    TRANSACTION_ROLLBACK_FAILED(0x00000045, "JDBC tranaction rollback failed.");
 
     private final int code;
     private final String message;
