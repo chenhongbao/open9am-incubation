@@ -67,8 +67,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void addHandler(ITraderEngineHandler handler) throws TraderException {
         if (handler == null) {
-            throw new TraderException(ErrorCodes.TRADER_ENGINE_HANDLER_NULL.code(),
-                                      ErrorCodes.TRADER_ENGINE_HANDLER_NULL.message());
+            throw new TraderException(ExceptionCodes.TRADER_ENGINE_HANDLER_NULL.code(),
+                                      ExceptionCodes.TRADER_ENGINE_HANDLER_NULL.message());
         }
         handlers.put(handler, new Object());
     }
@@ -87,8 +87,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void setAlgorithm(ITraderEngineAlgorithm algo) throws TraderException {
         if (algo == null) {
-            throw new TraderException(ErrorCodes.ALGORITHM_NULL.code(),
-                                      ErrorCodes.ALGORITHM_NULL.message());
+            throw new TraderException(ExceptionCodes.ALGORITHM_NULL.code(),
+                                      ExceptionCodes.ALGORITHM_NULL.message());
         }
         this.algo = algo;
     }
@@ -101,8 +101,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void setDataSource(IDataSource dataSource) throws TraderException {
         if (dataSource == null) {
-            throw new TraderException(ErrorCodes.DATASOURCE_NULL.code(),
-                                      ErrorCodes.DATASOURCE_NULL.message());
+            throw new TraderException(ExceptionCodes.DATASOURCE_NULL.code(),
+                                      ExceptionCodes.DATASOURCE_NULL.message());
         }
         ds = dataSource;
     }
@@ -143,8 +143,8 @@ public class TraderEngine implements ITraderEngine {
         }
         catch (Throwable th) {
             changeStatus(EngineStatus.SETTLE_FAILED);
-            throw new TraderException(ErrorCodes.UNEXPECTED_ERROR.code(),
-                                      ErrorCodes.UNEXPECTED_ERROR.message(),
+            throw new TraderException(ExceptionCodes.UNEXPECTED_ERROR.code(),
+                                      ExceptionCodes.UNEXPECTED_ERROR.message(),
                                       th);
         }
     }
@@ -159,8 +159,8 @@ public class TraderEngine implements ITraderEngine {
         changeStatus(EngineStatus.INITIALIZING);
         if (ds == null) {
             changeStatus(EngineStatus.INIT_FAILED);
-            throw new TraderException(ErrorCodes.DATASOURCE_NULL.code(),
-                                      ErrorCodes.DATASOURCE_NULL.message());
+            throw new TraderException(ExceptionCodes.DATASOURCE_NULL.code(),
+                                      ExceptionCodes.DATASOURCE_NULL.message());
         }
         try {
             var conn = ds.getConnection();
@@ -174,8 +174,8 @@ public class TraderEngine implements ITraderEngine {
         }
         catch (Throwable th) {
             changeStatus(EngineStatus.INIT_FAILED);
-            throw new TraderException(ErrorCodes.UNEXPECTED_ERROR.code(),
-                                      ErrorCodes.UNEXPECTED_ERROR.message(),
+            throw new TraderException(ExceptionCodes.UNEXPECTED_ERROR.code(),
+                                      ExceptionCodes.UNEXPECTED_ERROR.message(),
                                       th);
         }
     }
@@ -183,12 +183,12 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void registerTrader(int traderId, ITraderService trader) throws TraderException {
         if (trader == null) {
-            throw new TraderException(ErrorCodes.TRADER_SERVICE_NULL.code(),
-                                      ErrorCodes.TRADER_SERVICE_NULL.message());
+            throw new TraderException(ExceptionCodes.TRADER_SERVICE_NULL.code(),
+                                      ExceptionCodes.TRADER_SERVICE_NULL.message());
         }
         if (traders.containsKey(traderId)) {
-            throw new TraderException(ErrorCodes.TRADER_ID_DUPLICATED.code(),
-                                      ErrorCodes.TRADER_ID_DUPLICATED.message());
+            throw new TraderException(ExceptionCodes.TRADER_ID_DUPLICATED.code(),
+                                      ExceptionCodes.TRADER_ID_DUPLICATED.message());
         }
         addTrader(traderId, trader);
     }
@@ -196,8 +196,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void removeHanlder(ITraderEngineHandler handler) throws TraderException {
         if (handler == null) {
-            throw new TraderException(ErrorCodes.TRADER_ENGINE_HANDLER_NULL.code(),
-                                      ErrorCodes.TRADER_ENGINE_HANDLER_NULL.message());
+            throw new TraderException(ExceptionCodes.TRADER_ENGINE_HANDLER_NULL.code(),
+                                      ExceptionCodes.TRADER_ENGINE_HANDLER_NULL.message());
         }
         handlers.remove(handler);
     }
@@ -230,8 +230,8 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public void request(CancelRequest request, int requestId) throws TraderException {
         if (request == null) {
-            throw new TraderException(ErrorCodes.CANCEL_REQS_NULL.code(),
-                                      ErrorCodes.CANCEL_REQS_NULL.message());
+            throw new TraderException(ExceptionCodes.CANCEL_REQS_NULL.code(),
+                                      ExceptionCodes.CANCEL_REQS_NULL.message());
         }
         forwardRequest(request, request.getTraderId(), requestId);
     }
@@ -270,8 +270,8 @@ public class TraderEngine implements ITraderEngine {
         }
         catch (Throwable th) {
             changeStatus(EngineStatus.START_FAILED);
-            throw new TraderException(ErrorCodes.UNEXPECTED_ERROR.code(),
-                                      ErrorCodes.UNEXPECTED_ERROR.message(),
+            throw new TraderException(ExceptionCodes.UNEXPECTED_ERROR.code(),
+                                      ExceptionCodes.UNEXPECTED_ERROR.message(),
                                       th);
         }
     }
@@ -291,8 +291,8 @@ public class TraderEngine implements ITraderEngine {
         }
         catch (Throwable th) {
             changeStatus(EngineStatus.STOP_FAILED);
-            throw new TraderException(ErrorCodes.UNEXPECTED_ERROR.code(),
-                                      ErrorCodes.UNEXPECTED_ERROR.message(),
+            throw new TraderException(ExceptionCodes.UNEXPECTED_ERROR.code(),
+                                      ExceptionCodes.UNEXPECTED_ERROR.message(),
                                       th);
         }
     }
@@ -326,8 +326,8 @@ public class TraderEngine implements ITraderEngine {
             catch (Throwable th) {
                 try {
                     h.OnException(new TraderRuntimeException(
-                            ErrorCodes.USER_CODE_ERROR.code(),
-                            ErrorCodes.USER_CODE_ERROR.message(),
+                            ExceptionCodes.USER_CODE_ERROR.code(),
+                            ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
                 }
                 catch (Throwable ignored) {
@@ -347,8 +347,8 @@ public class TraderEngine implements ITraderEngine {
             catch (Throwable th) {
                 try {
                     h.OnException(new TraderRuntimeException(
-                            ErrorCodes.USER_CODE_ERROR.code(),
-                            ErrorCodes.USER_CODE_ERROR.message(),
+                            ExceptionCodes.USER_CODE_ERROR.code(),
+                            ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
                 }
                 catch (Throwable ignored) {
@@ -372,8 +372,8 @@ public class TraderEngine implements ITraderEngine {
             catch (Throwable th) {
                 try {
                     h.OnException(new TraderRuntimeException(
-                            ErrorCodes.USER_CODE_ERROR.code(),
-                            ErrorCodes.USER_CODE_ERROR.message(),
+                            ExceptionCodes.USER_CODE_ERROR.code(),
+                            ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
                 }
                 catch (Throwable ignored) {
@@ -393,8 +393,8 @@ public class TraderEngine implements ITraderEngine {
             catch (Throwable th) {
                 try {
                     callOnException(new TraderRuntimeException(
-                            ErrorCodes.USER_CODE_ERROR.code(),
-                            ErrorCodes.USER_CODE_ERROR.message(),
+                            ExceptionCodes.USER_CODE_ERROR.code(),
+                            ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
                 }
                 catch (Throwable ignored) {
@@ -409,8 +409,8 @@ public class TraderEngine implements ITraderEngine {
         }
         var t = request.getType();
         if (null == t) {
-            throw new TraderException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                      ErrorCodes.INVALID_ORDER_TYPE.message());
+            throw new TraderException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                      ExceptionCodes.INVALID_ORDER_TYPE.message());
         }
         else {
             switch (t) {
@@ -421,8 +421,8 @@ public class TraderEngine implements ITraderEngine {
                 case SELL_CLOSE_TODAY:
                     return c.getOpenType() == OrderType.BUY_OPEN;
                 default:
-                    throw new TraderException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                              ErrorCodes.INVALID_ORDER_TYPE.message());
+                    throw new TraderException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                              ExceptionCodes.INVALID_ORDER_TYPE.message());
             }
         }
     }
@@ -433,8 +433,8 @@ public class TraderEngine implements ITraderEngine {
         var rt = findTraderServiceRuntimeByTraderId(traderId);
         var h = rt.getHandler();
         if (h == null) {
-            throw new TraderException(ErrorCodes.TRADER_SVC_HANDLER_NULL.code(),
-                                      ErrorCodes.TRADER_SVC_HANDLER_NULL.message());
+            throw new TraderException(ExceptionCodes.TRADER_SVC_HANDLER_NULL.code(),
+                                      ExceptionCodes.TRADER_SVC_HANDLER_NULL.message());
         }
         var r = new CancelResponse();
         r.setInstrumentId(request.getInstrumentId());
@@ -449,8 +449,8 @@ public class TraderEngine implements ITraderEngine {
             h.OnCancelResponse(r);
         }
         catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.CANCEL_ORDER_FAILED.code(),
-                                                       ErrorCodes.CANCEL_ORDER_FAILED.message(),
+            callOnException(new TraderRuntimeException(ExceptionCodes.CANCEL_ORDER_FAILED.code(),
+                                                       ExceptionCodes.CANCEL_ORDER_FAILED.message(),
                                                        th));
         }
     }
@@ -462,36 +462,36 @@ public class TraderEngine implements ITraderEngine {
 
     private void check0() throws TraderException {
         if (ds == null) {
-            throw new TraderException(ErrorCodes.DATASOURCE_NULL.code(),
-                                      ErrorCodes.DATASOURCE_NULL.message());
+            throw new TraderException(ExceptionCodes.DATASOURCE_NULL.code(),
+                                      ExceptionCodes.DATASOURCE_NULL.message());
         }
         if (algo == null) {
-            throw new TraderException(ErrorCodes.ALGORITHM_NULL.code(),
-                                      ErrorCodes.ALGORITHM_NULL.message());
+            throw new TraderException(ExceptionCodes.ALGORITHM_NULL.code(),
+                                      ExceptionCodes.ALGORITHM_NULL.message());
         }
     }
 
     private void check1(Integer key, TraderServiceRuntime rt) throws TraderException {
         if (rt == null) {
             throw new TraderException(
-                    ErrorCodes.TRADER_ID_NOT_FOUND.code(),
-                    ErrorCodes.TRADER_ID_NOT_FOUND.message() + "(Trader ID:" + key.toString() + ")");
+                    ExceptionCodes.TRADER_ID_NOT_FOUND.code(),
+                    ExceptionCodes.TRADER_ID_NOT_FOUND.message() + "(Trader ID:" + key.toString() + ")");
         }
         if (rt.getTrader() == null) {
             throw new TraderException(
-                    ErrorCodes.TRADER_SERVICE_NULL.code(),
-                    ErrorCodes.TRADER_SERVICE_NULL.message() + "(Trader ID:" + key.toString() + ")");
+                    ExceptionCodes.TRADER_SERVICE_NULL.code(),
+                    ExceptionCodes.TRADER_SERVICE_NULL.message() + "(Trader ID:" + key.toString() + ")");
         }
     }
 
     private void check2(OrderRequest request, Instrument instrument) throws TraderException {
         if (request == null) {
-            throw new TraderException(ErrorCodes.ORDER_REQS_NULL.code(),
-                                      ErrorCodes.ORDER_REQS_NULL.message());
+            throw new TraderException(ExceptionCodes.ORDER_REQS_NULL.code(),
+                                      ExceptionCodes.ORDER_REQS_NULL.message());
         }
         if (instrument == null) {
-            throw new TraderException(ErrorCodes.INSTRUMENT_NULL.code(),
-                                      ErrorCodes.INSTRUMENT_NULL.message());
+            throw new TraderException(ExceptionCodes.INSTRUMENT_NULL.code(),
+                                      ExceptionCodes.INSTRUMENT_NULL.message());
         }
     }
 
@@ -499,8 +499,8 @@ public class TraderEngine implements ITraderEngine {
         checkVolumn(request.getVolumn());
         var cs = getAvailableContracts(request);
         if (cs.size() < request.getVolumn()) {
-            throw new TraderException(ErrorCodes.INSUFFICIENT_POSITION.code(),
-                                      ErrorCodes.INSUFFICIENT_POSITION.message());
+            throw new TraderException(ExceptionCodes.INSUFFICIENT_POSITION.code(),
+                                      ExceptionCodes.INSUFFICIENT_POSITION.message());
         }
         var r = new HashSet<Contract>(32);
         var c = algo.getCommission(request.getPrice(),
@@ -525,8 +525,8 @@ public class TraderEngine implements ITraderEngine {
         var total = request.getVolumn() * (m + c);
         var available = getAvailableMoney(properties);
         if (available < total) {
-            throw new TraderException(ErrorCodes.INSUFFICIENT_MONEY.code(),
-                                      ErrorCodes.INSUFFICIENT_MONEY.message());
+            throw new TraderException(ExceptionCodes.INSUFFICIENT_MONEY.code(),
+                                      ExceptionCodes.INSUFFICIENT_MONEY.message());
         }
         for (int i = 0; i < request.getVolumn(); ++i) {
             setFrozenOpen(a, m, c, request);
@@ -535,12 +535,12 @@ public class TraderEngine implements ITraderEngine {
 
     private void checkVolumn(Long v) throws TraderException {
         if (v == null) {
-            throw new TraderException(ErrorCodes.VOLUMN_NULL.code(),
-                                      ErrorCodes.VOLUMN_NULL.message());
+            throw new TraderException(ExceptionCodes.VOLUMN_NULL.code(),
+                                      ExceptionCodes.VOLUMN_NULL.message());
         }
         if (v <= 0) {
-            throw new TraderException(ErrorCodes.NONPOSITIVE_VOLUMN.code(),
-                                      ErrorCodes.NONPOSITIVE_VOLUMN.message());
+            throw new TraderException(ExceptionCodes.NONPOSITIVE_VOLUMN.code(),
+                                      ExceptionCodes.NONPOSITIVE_VOLUMN.message());
         }
     }
 
@@ -562,8 +562,8 @@ public class TraderEngine implements ITraderEngine {
     private Integer findTraderIdByOrderId(long orderId) throws TraderException {
         var traderId = orderTraders.get(orderId);
         if (traderId == null) {
-            throw new TraderException(ErrorCodes.ORDER_ID_NOT_FOUND.code(),
-                                      ErrorCodes.ORDER_ID_NOT_FOUND.message() + "(Order ID:" + orderId + ")");
+            throw new TraderException(ExceptionCodes.ORDER_ID_NOT_FOUND.code(),
+                                      ExceptionCodes.ORDER_ID_NOT_FOUND.message() + "(Order ID:" + orderId + ")");
         }
         return traderId;
     }
@@ -576,8 +576,8 @@ public class TraderEngine implements ITraderEngine {
             }
         });
         if (a.isEmpty()) {
-            throw new TraderException(ErrorCodes.NO_TRADER.code(),
-                                      ErrorCodes.NO_TRADER.message());
+            throw new TraderException(ExceptionCodes.NO_TRADER.code(),
+                                      ExceptionCodes.NO_TRADER.message());
         }
         var traderId = a.get(new Random().nextInt(a.size()));
         orderTraders.put(request.getOrderId(), traderId);
@@ -590,40 +590,54 @@ public class TraderEngine implements ITraderEngine {
         return rt;
     }
 
+    private void forward(OrderRequest request,
+                         ExtendedTraderServiceRuntime tr,
+                         int requestId) throws TraderException {
+        var destId = tr.getIdTranslator().getDestinatedId(request.getOrderId(), request.getVolumn());
+        request.setOrderId(destId);
+        tr.getTrader().insert(request, requestId);
+    }
+
+    private void forward(CancelRequest request,
+                         ExtendedTraderServiceRuntime tr,
+                         int requestId) throws TraderException {
+        var ids = tr.getIdTranslator().getDestinatedIds(request.getOrderId());
+        if (ids == null) {
+            throw new TraderException(ExceptionCodes.DEST_ID_NOT_FOUND.code(),
+                                      ExceptionCodes.DEST_ID_NOT_FOUND.message()
+                                      + "(Source order ID:" + request.getOrderId() + ")");
+        }
+        for (var i : ids) {
+            /*
+             * If the order is fulfilled, don't cancel it any more.
+             */
+            var cd = tr.getIdTranslator().getDownCountByDestId(i);
+            if (cd == null) {
+                throw new TraderException(
+                        ExceptionCodes.COUNTDOWN_NOT_FOUND.code(),
+                        ExceptionCodes.COUNTDOWN_NOT_FOUND.message() + "(Destinated ID: " + i + ")");
+            }
+            if (cd <= 0) {
+                continue;
+            }
+            var c = Utils.copy(request);
+            c.setOrderId(i);
+            tr.getTrader().cancel(c, requestId);
+        }
+    }
+
     private <T> void forwardRequest(T request, Integer traderId, int requestId) throws TraderException {
         var tr = findTraderServiceRuntimeByTraderId(traderId);
         check1(traderId, tr);
         if (request instanceof OrderRequest) {
-            var order = (OrderRequest) request;
-            var destId = tr.getIdTranslator().getDestinatedId(order.getOrderId(), order.getVolumn());
-            order.setOrderId(destId);
-            tr.getTrader().insert(order, requestId);
+            forward((OrderRequest) request, tr, requestId);
         }
         else if (request instanceof CancelRequest) {
-            var cancel = (CancelRequest) request;
-            var ids = tr.getIdTranslator().getDestinatedIds(cancel.getOrderId());
-            if (ids == null) {
-                throw new TraderException(ErrorCodes.DEST_ID_NOT_FOUND.code(),
-                                          ErrorCodes.DEST_ID_NOT_FOUND.message()
-                                          + "(Source order ID:" + cancel.getOrderId() + ")");
-            }
-            for (var i : ids) {
-                /*
-                 * If the order is fulfilled, don't cancel it any more.
-                 */
-                var cd = tr.getIdTranslator().getDownCountByDestId(i);
-                if (cd == null) {
-                    throw new TraderException(
-                            ErrorCodes.COUNTDOWN_NOT_FOUND.code(),
-                            ErrorCodes.COUNTDOWN_NOT_FOUND.message() + "(Destinated ID: " + i + ")");
-                }
-                if (cd <= 0) {
-                    continue;
-                }
-                var c = Utils.copy(cancel);
-                c.setOrderId(i);
-                tr.getTrader().cancel(c, requestId);
-            }
+            forward((CancelRequest) request, tr, requestId);
+        }
+        else {
+            throw new TraderException(ExceptionCodes.INVALID_REQUEST_INSTANCE.code(),
+                                      ExceptionCodes.INVALID_REQUEST_INSTANCE.message());
         }
     }
 
@@ -631,8 +645,8 @@ public class TraderEngine implements ITraderEngine {
         var conn = ds.getConnection();
         var cs = conn.getContractsByInstrumentId(request.getInstrumentId());
         if (cs == null) {
-            throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
-                                      ErrorCodes.CONTRACT_NULL.message());
+            throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
+                                      ExceptionCodes.CONTRACT_NULL.message());
         }
         var sorted = new LinkedList<Contract>(cs);
         sorted.sort((Contract o1, Contract o2)
@@ -659,8 +673,8 @@ public class TraderEngine implements ITraderEngine {
         for (var r : rsps) {
             var s = conn.getContractsByResponseId(r.getResponseId());
             if (s == null) {
-                throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
-                                          ErrorCodes.CONTRACT_NULL.message()
+                throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
+                                          ExceptionCodes.CONTRACT_NULL.message()
                                           + "(Response ID:" + r.getResponseId() + ")");
             }
             cs.addAll(s);
@@ -677,8 +691,8 @@ public class TraderEngine implements ITraderEngine {
             var rt = findTraderServiceRuntimeByTraderId(traderId);
             check1(traderId, rt);
             if (!rt.isEnabled()) {
-                throw new TraderException(ErrorCodes.TRADER_NOT_ENABLED.code(),
-                                          ErrorCodes.TRADER_NOT_ENABLED.message() + "(Trader ID:" + traderId + ")");
+                throw new TraderException(ExceptionCodes.TRADER_NOT_ENABLED.code(),
+                                          ExceptionCodes.TRADER_NOT_ENABLED.message() + "(Trader ID:" + traderId + ")");
             }
             orderTraders.put(request.getOrderId(), traderId);
             return rt;
@@ -708,8 +722,8 @@ public class TraderEngine implements ITraderEngine {
                                    var co = Utils.copy(request);
                                    if (co == null) {
                                        throw new TraderRuntimeException(
-                                               ErrorCodes.OBJECT_COPY_FAILED.code(),
-                                               ErrorCodes.OBJECT_COPY_FAILED.message());
+                                               ExceptionCodes.OBJECT_COPY_FAILED.code(),
+                                               ExceptionCodes.OBJECT_COPY_FAILED.message());
                                    }
                                    if (co.getType() == OrderType.BUY_CLOSE_TODAY) {
                                        co.setType(OrderType.BUY_CLOSE);
@@ -729,8 +743,8 @@ public class TraderEngine implements ITraderEngine {
                                       var co = Utils.copy(request);
                                       if (co == null) {
                                           throw new TraderRuntimeException(
-                                                  ErrorCodes.OBJECT_COPY_FAILED.code(),
-                                                  ErrorCodes.OBJECT_COPY_FAILED.message());
+                                                  ExceptionCodes.OBJECT_COPY_FAILED.code(),
+                                                  ExceptionCodes.OBJECT_COPY_FAILED.message());
                                       }
                                       if (co.getType() == OrderType.BUY_CLOSE) {
                                           co.setType(OrderType.BUY_CLOSE_TODAY);
@@ -754,8 +768,8 @@ public class TraderEngine implements ITraderEngine {
 
     private void initAccount(Account a) throws TraderException {
         if (a == null) {
-            throw new TraderException(ErrorCodes.ACCOUNT_NULL.code(),
-                                      ErrorCodes.ACCOUNT_NULL.message());
+            throw new TraderException(ExceptionCodes.ACCOUNT_NULL.code(),
+                                      ExceptionCodes.ACCOUNT_NULL.message());
         }
         callOnErasedAccount(a);
         final var conn = ds.getConnection();
@@ -776,8 +790,8 @@ public class TraderEngine implements ITraderEngine {
 
     private void initContracts(Collection<Contract> cs, IDataConnection conn) throws TraderException {
         if (cs == null) {
-            throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
-                                      ErrorCodes.CONTRACT_NULL.message());
+            throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
+                                      ExceptionCodes.CONTRACT_NULL.message());
         }
         callOnErasedContracts(cs);
         for (var c : cs) {
@@ -785,7 +799,9 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private void setFrozenClose(double cm, Contract c, OrderType type) throws DataSourceException, TraderException {
+    private void setFrozenClose(double commission,
+                                Contract contract,
+                                OrderType type) throws TraderException {
         IDataConnection conn = null;
         try {
             conn = ds.getConnection();
@@ -794,16 +810,16 @@ public class TraderEngine implements ITraderEngine {
             /*
              * Update contracts status to make it frozen.
              */
-            c.setStatus(ContractStatus.CLOSING);
-            conn.updateContract(c);
+            contract.setStatus(ContractStatus.CLOSING);
+            conn.updateContract(contract);
             /*
              * Add new commission for the current order, and make it frozen
              * before order is filled.
              */
             var cms = new Commission();
-            cms.setCommission(cm);
+            cms.setCommission(commission);
             cms.setCommissionId(Utils.getId());
-            cms.setContractId(c.getContractId());
+            cms.setContractId(contract.getContractId());
             cms.setStatus(FeeStatus.FORZEN);
             cms.setTradingDay(tradingDay);
             cms.setType(type);
@@ -889,30 +905,30 @@ public class TraderEngine implements ITraderEngine {
         final var conn = ds.getConnection();
         var rs = conn.getOrderRequests();
         if (rs == null) {
-            throw new TraderException(ErrorCodes.ORDER_REQS_NULL.code(),
-                                      ErrorCodes.ORDER_REQS_NULL.message());
+            throw new TraderException(ExceptionCodes.ORDER_REQS_NULL.code(),
+                                      ExceptionCodes.ORDER_REQS_NULL.message());
         }
         for (var r : rs) {
             var orderId = r.getOrderId();
             if (orderId == null) {
-                throw new TraderException(ErrorCodes.ORDER_ID_NULL.code(),
-                                          ErrorCodes.ORDER_ID_NULL.message());
+                throw new TraderException(ExceptionCodes.ORDER_ID_NULL.code(),
+                                          ExceptionCodes.ORDER_ID_NULL.message());
             }
             var rsps = conn.getOrderResponsesByOrderId(orderId);
             if (rsps == null) {
-                throw new TraderException(ErrorCodes.ORDER_RSPS_NULL.code(),
-                                          ErrorCodes.ORDER_RSPS_NULL.message());
+                throw new TraderException(ExceptionCodes.ORDER_RSPS_NULL.code(),
+                                          ExceptionCodes.ORDER_RSPS_NULL.message());
             }
             var ctrs = getContractsByOrderResponses(rsps);
             if (ctrs == null) {
-                throw new TraderException(ErrorCodes.CONTRACT_NULL.code(),
-                                          ErrorCodes.CONTRACT_NULL.message());
+                throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
+                                          ExceptionCodes.CONTRACT_NULL.message());
 
             }
             var cals = conn.getCancelResponseByOrderId(orderId);
             if (cals == null) {
-                throw new TraderException(ErrorCodes.CANCEL_RSPS_NULL.code(),
-                                          ErrorCodes.CANCEL_RSPS_NULL.message());
+                throw new TraderException(ExceptionCodes.CANCEL_RSPS_NULL.code(),
+                                          ExceptionCodes.CANCEL_RSPS_NULL.message());
 
             }
             var o = algo.getOrder(r, ctrs, rsps, cals);

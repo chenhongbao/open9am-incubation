@@ -66,8 +66,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         double margin = 0D;
         double commission = 0D;
         if (positions == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.POSITION_NULL.code(),
-                                                     ErrorCodes.POSITION_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.POSITION_NULL.code(),
+                                                     ExceptionCodes.POSITION_NULL.message());
         }
         for (var p : positions) {
             check4(p.getCloseProfit(),
@@ -105,8 +105,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         check0(instrument);
         var multiple = instrument.getMultiple();
         if (multiple == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.MULTIPLE_NULL.code(),
-                                                     ErrorCodes.MULTIPLE_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.MULTIPLE_NULL.code(),
+                                                     ExceptionCodes.MULTIPLE_NULL.message()
                                                      + "(" + instrument.getInstrumentId() + ")");
         }
         return price * multiple;
@@ -121,8 +121,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         check1(ctype);
         var ratio = getProperCommissionRatio(instrument, type);
         if (ratio == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.RATIO_NULL.code(),
-                                                     ErrorCodes.RATIO_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.RATIO_NULL.code(),
+                                                     ExceptionCodes.RATIO_NULL.message()
                                                      + "(" + instrument.getInstrumentId() + ")");
         }
         if (ctype == RatioType.BY_MONEY) {
@@ -141,8 +141,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         check1(type);
         var ratio = instrument.getMarginRatio();
         if (ratio == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.RATIO_NULL.code(),
-                                                     ErrorCodes.RATIO_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.RATIO_NULL.code(),
+                                                     ExceptionCodes.RATIO_NULL.message()
                                                      + "(" + instrument.getInstrumentId() + ")");
         }
         if (type == RatioType.BY_MONEY) {
@@ -176,8 +176,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                              Collection<Margin> margins,
                                              Properties properties) throws TraderEngineAlgorithmException {
         if (contracts == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.CONTRACT_NULL.code(),
-                                                     ErrorCodes.CONTRACT_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.CONTRACT_NULL.code(),
+                                                     ExceptionCodes.CONTRACT_NULL.message());
         }
         final var ls = new HashMap<String, Position>(64);
         final var ss = new HashMap<String, Position>(64);
@@ -199,8 +199,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             Position p;
             var type = c.getOpenType();
             if (null == type) {
-                throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                                         ErrorCodes.INVALID_ORDER_TYPE.message());
+                throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                                         ExceptionCodes.INVALID_ORDER_TYPE.message());
             }
             switch (type) {
                 case BUY_OPEN:
@@ -214,8 +214,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                    });
                     break;
                 default:
-                    throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                                             ErrorCodes.INVALID_ORDER_TYPE.message());
+                    throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                                             ExceptionCodes.INVALID_ORDER_TYPE.message());
             }
             var iid = c.getInstrumentId();
             check2(iid);
@@ -445,8 +445,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                 Instrument instrument) throws TraderEngineAlgorithmException {
         var status = c.getStatus();
         if (status == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.CONTRACT_STATUS_NULL.code(),
-                                                     ErrorCodes.CONTRACT_STATUS_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.CONTRACT_STATUS_NULL.code(),
+                                                     ExceptionCodes.CONTRACT_STATUS_NULL.message()
                                                      + "(Contract ID:" + c.getContractId() + ")");
         }
         switch (status) {
@@ -472,8 +472,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                 instrument);
                 break;
             default:
-                throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_CONTRACT_STATUS.code(),
-                                                         ErrorCodes.INVALID_CONTRACT_STATUS.message()
+                throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_CONTRACT_STATUS.code(),
+                                                         ExceptionCodes.INVALID_CONTRACT_STATUS.message()
                                                          + "(Contract ID:" + c.getContractId() + ")");
         }
         addPreContract(p,
@@ -537,8 +537,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                   Instrument instrument) throws TraderEngineAlgorithmException {
         var status = c.getStatus();
         if (status == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.CONTRACT_STATUS_NULL.code(),
-                                                     ErrorCodes.CONTRACT_STATUS_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.CONTRACT_STATUS_NULL.code(),
+                                                     ExceptionCodes.CONTRACT_STATUS_NULL.message()
                                                      + "(Contract ID:" + c.getContractId() + ")");
         }
         switch (status) {
@@ -589,41 +589,41 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
 
     private void check0(Instrument instrument) throws TraderEngineAlgorithmException {
         if (instrument == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INSTRUMENT_NULL.code(),
-                                                     ErrorCodes.INSTRUMENT_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INSTRUMENT_NULL.code(),
+                                                     ExceptionCodes.INSTRUMENT_NULL.message());
         }
     }
 
     private void check1(RatioType type) throws TraderEngineAlgorithmException {
         if (type == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.RATIO_TYPE_NULL.code(),
-                                                     ErrorCodes.RATIO_TYPE_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.RATIO_TYPE_NULL.code(),
+                                                     ExceptionCodes.RATIO_TYPE_NULL.message());
         }
     }
 
     private void check2(String instrumentId) throws TraderEngineAlgorithmException {
         if (instrumentId == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INSTRUMENT_ID_NULL.code(),
-                                                     ErrorCodes.INSTRUMENT_ID_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INSTRUMENT_ID_NULL.code(),
+                                                     ExceptionCodes.INSTRUMENT_ID_NULL.message());
         }
         if (instrumentId.isBlank()) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_INSTRUMENT_ID.code(),
-                                                     ErrorCodes.INVALID_INSTRUMENT_ID.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_INSTRUMENT_ID.code(),
+                                                     ExceptionCodes.INVALID_INSTRUMENT_ID.message());
         }
     }
 
     private void check3(Long contractId) throws TraderEngineAlgorithmException {
         if (contractId == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.CONTRACT_ID_NULL.code(),
-                                                     ErrorCodes.CONTRACT_ID_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.CONTRACT_ID_NULL.code(),
+                                                     ExceptionCodes.CONTRACT_ID_NULL.message());
         }
     }
 
     private void check4(Object... values) throws TraderEngineAlgorithmException {
         for (var v : values) {
             if (v == null) {
-                throw new TraderEngineAlgorithmException(ErrorCodes.POSITION_FIELD_NULL.code(),
-                                                         ErrorCodes.POSITION_FIELD_NULL.message());
+                throw new TraderEngineAlgorithmException(ExceptionCodes.POSITION_FIELD_NULL.code(),
+                                                         ExceptionCodes.POSITION_FIELD_NULL.message());
             }
         }
     }
@@ -633,8 +633,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             Map<Long, Set<Commission>> commissions) throws TraderEngineAlgorithmException {
         var v = commissions.get(contractId);
         if (v == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.COMMISSION_NULL.code(),
-                                                     ErrorCodes.COMMISSION_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.COMMISSION_NULL.code(),
+                                                     ExceptionCodes.COMMISSION_NULL.message()
                                                      + "(Contract ID:" + contractId + ")");
         }
         return v;
@@ -644,8 +644,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                               Properties properties) throws TraderEngineAlgorithmException {
         var v = getObject(key, properties);
         if (!(v instanceof Instrument)) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.code(),
-                                                     ErrorCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.code(),
+                                                     ExceptionCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.message()
                                                      + "(" + key + ")");
         }
         return (Instrument) v;
@@ -655,13 +655,13 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             throws TraderEngineAlgorithmException {
         var v = margins.get(contractId);
         if (v == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.MARGIN_NULL.code(),
-                                                     ErrorCodes.MARGIN_NULL.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.MARGIN_NULL.code(),
+                                                     ExceptionCodes.MARGIN_NULL.message()
                                                      + "(Contract ID:" + contractId + ")");
         }
         if (!(v instanceof Margin)) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTY_WRONG_MARGIN_TYPE.code(),
-                                                     ErrorCodes.PROPERTY_WRONG_MARGIN_TYPE.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_MARGIN_TYPE.code(),
+                                                     ExceptionCodes.PROPERTY_WRONG_MARGIN_TYPE.message()
                                                      + "(Contract ID:" + contractId + ")");
         }
         return v;
@@ -671,8 +671,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                      Properties properties) throws TraderEngineAlgorithmException {
         var v = getObject(key, properties);
         if (!(v instanceof Double)) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTY_WRONG_PRICE_TYPE.code(),
-                                                     ErrorCodes.PROPERTY_WRONG_PRICE_TYPE.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_PRICE_TYPE.code(),
+                                                     ExceptionCodes.PROPERTY_WRONG_PRICE_TYPE.message()
                                                      + "(" + key + ")");
         }
         return (Double) v;
@@ -681,8 +681,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
     private LocalDate getDate(String key, Properties properties) throws TraderEngineAlgorithmException {
         var v = getObject(key, properties);
         if (!(v instanceof LocalDate)) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTY_WRONG_DATE_TYPE.code(),
-                                                     ErrorCodes.PROPERTY_WRONG_DATE_TYPE.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_DATE_TYPE.code(),
+                                                     ExceptionCodes.PROPERTY_WRONG_DATE_TYPE.message()
                                                      + "(" + key + ")");
         }
         return (LocalDate) v;
@@ -690,13 +690,13 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
 
     private Object getObject(String key, Properties properties) throws TraderEngineAlgorithmException {
         if (properties == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTIES_NULL.code(),
-                                                     ErrorCodes.PROPERTIES_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTIES_NULL.code(),
+                                                     ExceptionCodes.PROPERTIES_NULL.message());
         }
         var v = properties.get(key);
         if (v == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.PROPERTY_NOT_FOUND.code(),
-                                                     ErrorCodes.PROPERTY_NOT_FOUND.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_NOT_FOUND.code(),
+                                                     ExceptionCodes.PROPERTY_NOT_FOUND.message()
                                                      + "(" + key + ")");
         }
         return v;
@@ -708,8 +708,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         }
         var traded = order.getTradedVolumn();
         if (traded > order.getVolumn()) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INCONSISTENT_CONTRACT_ORDER_INFO.code(),
-                                                     ErrorCodes.INCONSISTENT_CONTRACT_ORDER_INFO.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INCONSISTENT_CONTRACT_ORDER_INFO.code(),
+                                                     ExceptionCodes.INCONSISTENT_CONTRACT_ORDER_INFO.message()
                                                      + "(Order ID:" + order.getOrderId() + ")");
         }
         if (traded > 0) {
@@ -733,8 +733,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             if (Objects.equals(c.getContractId(), contractId) && c.getStatus() == status) {
                 var x = c.getCommission();
                 if (x == null) {
-                    throw new TraderEngineAlgorithmException(ErrorCodes.COMMISSION_AMOUNT_NULL.code(),
-                                                             ErrorCodes.COMMISSION_AMOUNT_NULL.message());
+                    throw new TraderEngineAlgorithmException(ExceptionCodes.COMMISSION_AMOUNT_NULL.code(),
+                                                             ExceptionCodes.COMMISSION_AMOUNT_NULL.message());
                 }
                 v += x;
             }
@@ -759,15 +759,15 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
 
     private double getProperDeposit(Collection<Deposit> deposits) throws TraderEngineAlgorithmException {
         if (deposits == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.DEPOSIT_NULL.code(),
-                                                     ErrorCodes.DEPOSIT_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.DEPOSIT_NULL.code(),
+                                                     ExceptionCodes.DEPOSIT_NULL.message());
         }
         double deposit = 0D;
         for (var d : deposits) {
             var a = d.getAmount();
             if (a == null) {
-                throw new TraderEngineAlgorithmException(ErrorCodes.DEPOSIT_AMOUNT_NULL.code(),
-                                                         ErrorCodes.DEPOSIT_AMOUNT_NULL.message());
+                throw new TraderEngineAlgorithmException(ExceptionCodes.DEPOSIT_AMOUNT_NULL.code(),
+                                                         ExceptionCodes.DEPOSIT_AMOUNT_NULL.message());
             }
             deposit += d.getAmount();
         }
@@ -782,8 +782,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             return margin.getMargin();
         }
         else {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_FEE_STATUS.code(),
-                                                     ErrorCodes.INVALID_FEE_STATUS.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_FEE_STATUS.code(),
+                                                     ExceptionCodes.INVALID_FEE_STATUS.message());
         }
     }
 
@@ -798,8 +798,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                    double current,
                                    OrderType type) throws TraderEngineAlgorithmException {
         if (null == type) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                                     ErrorCodes.INVALID_ORDER_TYPE.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                                     ExceptionCodes.INVALID_ORDER_TYPE.message());
         }
         else {
             switch (type) {
@@ -808,8 +808,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                 case SELL_OPEN:
                     return pre - current;
                 default:
-                    throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_ORDER_TYPE.code(),
-                                                             ErrorCodes.INVALID_ORDER_TYPE.message());
+                    throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
+                                                             ExceptionCodes.INVALID_ORDER_TYPE.message());
             }
         }
     }
@@ -820,22 +820,22 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             return 1L;
         }
         else {
-            throw new TraderEngineAlgorithmException(ErrorCodes.INVALID_CONTRACT_STATUS.code(),
-                                                     ErrorCodes.INVALID_CONTRACT_STATUS.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INVALID_CONTRACT_STATUS.code(),
+                                                     ExceptionCodes.INVALID_CONTRACT_STATUS.message());
         }
     }
 
     private double getProperWithdraw(Collection<Withdraw> withdraws) throws TraderEngineAlgorithmException {
         if (withdraws == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.WITHDRAW_NULL.code(),
-                                                     ErrorCodes.DEPOSIT_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.WITHDRAW_NULL.code(),
+                                                     ExceptionCodes.DEPOSIT_NULL.message());
         }
         double withdraw = 0D;
         for (var w : withdraws) {
             var a = w.getAmount();
             if (a == null) {
-                throw new TraderEngineAlgorithmException(ErrorCodes.WITHDRAW_AMOUNT_NULL.code(),
-                                                         ErrorCodes.WITHDRAW_AMOUNT_NULL.message());
+                throw new TraderEngineAlgorithmException(ExceptionCodes.WITHDRAW_AMOUNT_NULL.code(),
+                                                         ExceptionCodes.WITHDRAW_AMOUNT_NULL.message());
             }
             withdraw += w.getAmount();
         }
@@ -885,8 +885,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
     private void setCancelOrder(Order order,
                                 Collection<CancelResponse> cancels) throws TraderEngineAlgorithmException {
         if (cancels == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.CANCEL_RSPS_NULL.code(),
-                                                     ErrorCodes.CANCEL_RSPS_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.CANCEL_RSPS_NULL.code(),
+                                                     ExceptionCodes.CANCEL_RSPS_NULL.message());
         }
         if (cancels.isEmpty()) {
             order.setIsCanceled(Boolean.FALSE);
@@ -910,8 +910,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
         for (var c : contracts) {
             if (c.getOpenType() != order.getType()
                 || c.getInstrumentId().equals(order.getInstrumentId())) {
-                throw new TraderEngineAlgorithmException(ErrorCodes.INCONSISTENT_CONTRACT_ORDER_INFO.code(),
-                                                         ErrorCodes.INCONSISTENT_CONTRACT_ORDER_INFO.message());
+                throw new TraderEngineAlgorithmException(ExceptionCodes.INCONSISTENT_CONTRACT_ORDER_INFO.code(),
+                                                         ExceptionCodes.INCONSISTENT_CONTRACT_ORDER_INFO.message());
             }
             amount += c.getOpenAmount();
             ++tradedVolumn;
@@ -931,8 +931,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
     private void setResponseOrder(Order order,
                                   Collection<OrderResponse> trades) throws TraderEngineAlgorithmException {
         if (trades == null) {
-            throw new TraderEngineAlgorithmException(ErrorCodes.ORDER_RSPS_NULL.code(),
-                                                     ErrorCodes.ORDER_RSPS_NULL.message());
+            throw new TraderEngineAlgorithmException(ExceptionCodes.ORDER_RSPS_NULL.code(),
+                                                     ExceptionCodes.ORDER_RSPS_NULL.message());
         }
         if (trades.isEmpty()) {
             return;

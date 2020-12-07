@@ -48,8 +48,8 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     public TraderEngineDataConnection(Connection connection) throws DataSourceException {
         if (connection == null) {
-            throw new DataSourceException(ErrorCodes.DATA_CONNECTION_NULL.code(),
-                                          ErrorCodes.DATA_CONNECTION_NULL.message());
+            throw new DataSourceException(ExceptionCodes.DATA_CONNECTION_NULL.code(),
+                                          ExceptionCodes.DATA_CONNECTION_NULL.message());
         }
         conn = connection;
     }
@@ -110,8 +110,8 @@ public class TraderEngineDataConnection implements IDataConnection {
             conn.commit();
         }
         catch (SQLException ex) {
-            throw new DataSourceException(ErrorCodes.TRANSACTION_COMMIT_FAILED.code(),
-                                          ErrorCodes.TRANSACTION_COMMIT_FAILED.message(),
+            throw new DataSourceException(ExceptionCodes.TRANSACTION_COMMIT_FAILED.code(),
+                                          ExceptionCodes.TRANSACTION_COMMIT_FAILED.message(),
                                           ex);
         }
         finally {
@@ -285,8 +285,8 @@ public class TraderEngineDataConnection implements IDataConnection {
             conn.rollback();
         }
         catch (SQLException ex) {
-            throw new DataSourceException(ErrorCodes.TRANSACTION_ROLLBACK_FAILED.code(),
-                                          ErrorCodes.TRANSACTION_ROLLBACK_FAILED.message(),
+            throw new DataSourceException(ExceptionCodes.TRANSACTION_ROLLBACK_FAILED.code(),
+                                          ExceptionCodes.TRANSACTION_ROLLBACK_FAILED.message(),
                                           ex);
         }
         finally {
@@ -302,8 +302,8 @@ public class TraderEngineDataConnection implements IDataConnection {
         }
         catch (SQLException ex) {
             restoreTransaction();
-            throw new DataSourceException(ErrorCodes.TRANSACTION_BEGIN_FAILED.code(),
-                                          ErrorCodes.TRANSACTION_BEGIN_FAILED.message(),
+            throw new DataSourceException(ExceptionCodes.TRANSACTION_BEGIN_FAILED.code(),
+                                          ExceptionCodes.TRANSACTION_BEGIN_FAILED.message(),
                                           ex);
         }
     }
@@ -340,8 +340,8 @@ public class TraderEngineDataConnection implements IDataConnection {
             }
         }
         catch (SQLException ex) {
-            throw new DataSourceException(ErrorCodes.TRANSACTION_RESTORE_FAILED.code(),
-                                          ErrorCodes.TRANSACTION_RESTORE_FAILED.message(),
+            throw new DataSourceException(ExceptionCodes.TRANSACTION_RESTORE_FAILED.code(),
+                                          ExceptionCodes.TRANSACTION_RESTORE_FAILED.message(),
                                           ex);
         }
     }

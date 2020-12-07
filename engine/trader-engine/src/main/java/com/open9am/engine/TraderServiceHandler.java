@@ -66,8 +66,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             conn.addCancelResponse(response);
             var o = conn.getOrderRequestById(response.getOrderId());
             if (o == null) {
-                throw new TraderRuntimeException(ErrorCodes.ORDER_ID_NOT_FOUND.code(),
-                                                 ErrorCodes.ORDER_ID_NOT_FOUND.message());
+                throw new TraderRuntimeException(ExceptionCodes.ORDER_ID_NOT_FOUND.code(),
+                                                 ExceptionCodes.ORDER_ID_NOT_FOUND.message());
             }
             var type = o.getType();
             if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
@@ -132,8 +132,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 h.OnException(exception);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -160,8 +160,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                                  requestId);
         }
         catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                       ErrorCodes.USER_CODE_ERROR.message(),
+            callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                       ExceptionCodes.USER_CODE_ERROR.message(),
                                                        th));
         }
     }
@@ -217,8 +217,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                     ++count;
                 }
                 if (count < response.getVolumn()) {
-                    throw new TraderRuntimeException(ErrorCodes.INCONSISTENT_FROZEN_INFO.code(),
-                                                     ErrorCodes.INCONSISTENT_FROZEN_INFO.message());
+                    throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
+                                                     ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
                 }
             }
             else {
@@ -242,8 +242,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                     ++count;
                 }
                 if (count < response.getVolumn()) {
-                    throw new TraderRuntimeException(ErrorCodes.INCONSISTENT_FROZEN_INFO.code(),
-                                                     ErrorCodes.INCONSISTENT_FROZEN_INFO.message());
+                    throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
+                                                     ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
                 }
             }
             conn.commit();
@@ -276,8 +276,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 h.OnTraderServiceStatusChange(status);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -293,8 +293,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 h.OnCancelResponse(response);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -314,8 +314,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                               requestId);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -343,8 +343,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                               requestId);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -360,8 +360,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 h.OnOrderReponse(response);
             }
             catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ErrorCodes.USER_CODE_ERROR.code(),
-                                                           ErrorCodes.USER_CODE_ERROR.message(),
+                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                           ExceptionCodes.USER_CODE_ERROR.message(),
                                                            th));
             }
         });
@@ -391,45 +391,45 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     private void checkCommissionsNull(Collection<Commission> cs) {
         if (cs == null) {
-            throw new TraderRuntimeException(ErrorCodes.COMMISSION_NULL.code(),
-                                             ErrorCodes.COMMISSION_NULL.message());
+            throw new TraderRuntimeException(ExceptionCodes.COMMISSION_NULL.code(),
+                                             ExceptionCodes.COMMISSION_NULL.message());
         }
     }
 
     private void checkContractIdNull(Long cid) {
         if (cid == null) {
-            throw new TraderRuntimeException(ErrorCodes.CONTRACT_ID_NULL.code(),
-                                             ErrorCodes.CONTRACT_ID_NULL.message());
+            throw new TraderRuntimeException(ExceptionCodes.CONTRACT_ID_NULL.code(),
+                                             ExceptionCodes.CONTRACT_ID_NULL.message());
         }
     }
 
     private void checkContractNull(Contract cc) {
         if (cc == null) {
-            throw new TraderRuntimeException(ErrorCodes.CONTRACT_NULL.code(),
-                                             ErrorCodes.CONTRACT_NULL.message());
+            throw new TraderRuntimeException(ExceptionCodes.CONTRACT_NULL.code(),
+                                             ExceptionCodes.CONTRACT_NULL.message());
         }
     }
 
     private void checkFrozenInfo(Collection<FrozenBundle> bs) {
         bs.forEach(v -> {
             if (v.getCommission() == null || v.getContract() == null || v.getMargin() == null) {
-                throw new TraderRuntimeException(ErrorCodes.INCONSISTENT_FROZEN_INFO.code(),
-                                                 ErrorCodes.INCONSISTENT_FROZEN_INFO.message());
+                throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
+                                                 ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
             }
         });
     }
 
     private void checkMarginNull(Margin n) {
         if (n == null) {
-            throw new TraderRuntimeException(ErrorCodes.MARGIN_NULL.code(),
-                                             ErrorCodes.MARGIN_NULL.message());
+            throw new TraderRuntimeException(ExceptionCodes.MARGIN_NULL.code(),
+                                             ExceptionCodes.MARGIN_NULL.message());
         }
     }
 
     private void checkMarginsNull(Collection<Margin> cs) {
         if (cs == null) {
-            throw new TraderRuntimeException(ErrorCodes.MARGIN_NULL.code(),
-                                             ErrorCodes.MARGIN_NULL.message());
+            throw new TraderRuntimeException(ExceptionCodes.MARGIN_NULL.code(),
+                                             ExceptionCodes.MARGIN_NULL.message());
         }
     }
 
@@ -497,8 +497,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     private IDataSource getDataSource() throws TraderException {
         var ds = info.getEngine().getDataSource();
         if (ds == null) {
-            throw new TraderException(ErrorCodes.DATASOURCE_NULL.code(),
-                                      ErrorCodes.DATASOURCE_NULL.message());
+            throw new TraderException(ExceptionCodes.DATASOURCE_NULL.code(),
+                                      ExceptionCodes.DATASOURCE_NULL.message());
         }
         return ds;
     }
@@ -526,8 +526,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         var instrument = info.getEngine().getRelatedInstrument(instrumentId);
         if (instrument == null) {
             throw new TraderException(
-                    ErrorCodes.INSTRUMENT_NULL.code(),
-                    ErrorCodes.INSTRUMENT_NULL.message() + "(Instrument ID:"
+                    ExceptionCodes.INSTRUMENT_NULL.code(),
+                    ExceptionCodes.INSTRUMENT_NULL.message() + "(Instrument ID:"
                     + instrumentId + ")");
         }
         return instrument;
@@ -573,8 +573,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             response.setTraderId(info.getTraderId());
         }
         catch (Throwable th) {
-            throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),
-                                      ErrorCodes.PREPROC_RSPS_FAILED.message(),
+            throw new TraderException(ExceptionCodes.PREPROC_RSPS_FAILED.code(),
+                                      ExceptionCodes.PREPROC_RSPS_FAILED.message(),
                                       th);
         }
     }
@@ -593,32 +593,32 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             response.setTraderId(info.getTraderId());
         }
         catch (Throwable th) {
-            throw new TraderException(ErrorCodes.PREPROC_RSPS_FAILED.code(),
-                                      ErrorCodes.PREPROC_RSPS_FAILED.message(),
+            throw new TraderException(ExceptionCodes.PREPROC_RSPS_FAILED.code(),
+                                      ExceptionCodes.PREPROC_RSPS_FAILED.message(),
                                       th);
         }
     }
 
     private void requireStatus(Contract c, ContractStatus s) {
         if (!Objects.equals(c.getStatus(), s)) {
-            throw new TraderRuntimeException(ErrorCodes.INVALID_CANCELING_CONTRACT_STATUS.code(),
-                                             ErrorCodes.INVALID_CANCELING_CONTRACT_STATUS.message()
+            throw new TraderRuntimeException(ExceptionCodes.INVALID_CANCELING_CONTRACT_STATUS.code(),
+                                             ExceptionCodes.INVALID_CANCELING_CONTRACT_STATUS.message()
                                              + "(Contract ID:" + c.getContractId() + ")");
         }
     }
 
     private void requireStatus(Margin m, FeeStatus s) {
         if (!Objects.equals(m.getStatus(), s)) {
-            throw new TraderRuntimeException(ErrorCodes.INVALID_CANCELING_MARGIN_STATUS.code(),
-                                             ErrorCodes.INVALID_CANCELING_MARGIN_STATUS.message()
+            throw new TraderRuntimeException(ExceptionCodes.INVALID_CANCELING_MARGIN_STATUS.code(),
+                                             ExceptionCodes.INVALID_CANCELING_MARGIN_STATUS.message()
                                              + "(Contract ID:" + m.getMarginId() + ")");
         }
     }
 
     private void requireStatus(Commission c, FeeStatus s) {
         if (!Objects.equals(c.getStatus(), s)) {
-            throw new TraderRuntimeException(ErrorCodes.INVALID_CANCELING_MARGIN_STATUS.code(),
-                                             ErrorCodes.INVALID_CANCELING_MARGIN_STATUS.message()
+            throw new TraderRuntimeException(ExceptionCodes.INVALID_CANCELING_MARGIN_STATUS.code(),
+                                             ExceptionCodes.INVALID_CANCELING_MARGIN_STATUS.message()
                                              + "(Contract ID:" + c.getCommissionId() + ")");
         }
     }
@@ -629,8 +629,8 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
         catch (DataSourceException ex) {
             callOnException(new TraderRuntimeException(
-                    ErrorCodes.DS_FAILURE_UNFIXABLE.code(),
-                    ErrorCodes.DS_FAILURE_UNFIXABLE.message(),
+                    ExceptionCodes.DS_FAILURE_UNFIXABLE.code(),
+                    ExceptionCodes.DS_FAILURE_UNFIXABLE.message(),
                     ex));
         }
     }

@@ -20,7 +20,7 @@ package com.open9am.engine;
  *
  * @author chenh
  */
-public enum ErrorCodes {
+public enum ExceptionCodes {
     TRADER_ID_NOT_FOUND(0x00000001, "No such trader ID in map."),
     TRADER_SELECT_TYPE_NULL(0x00000002, "Trader selection type null."),
     TRADER_ID_DUPLICATED(0x00000003, "Duplicated trader ID."),
@@ -90,12 +90,13 @@ public enum ErrorCodes {
     TRANSACTION_COMMIT_FAILED(0x00000042, "Transaction commit failed."),
     TRANSACTION_BEGIN_FAILED(0x00000043, "JDBC transaction begin failed."),
     TRANSACTION_RESTORE_FAILED(0x00000044, "JDBC transaction store failed."),
-    TRANSACTION_ROLLBACK_FAILED(0x00000045, "JDBC tranaction rollback failed.");
+    TRANSACTION_ROLLBACK_FAILED(0x00000045, "JDBC tranaction rollback failed."),
+    INVALID_REQUEST_INSTANCE(0x00000046, "Invalid request instance.");
 
     private final int code;
     private final String message;
 
-    private ErrorCodes(int code, String message) {
+    private ExceptionCodes(int code, String message) {
         this.code = code;
         this.message = message;
     }
