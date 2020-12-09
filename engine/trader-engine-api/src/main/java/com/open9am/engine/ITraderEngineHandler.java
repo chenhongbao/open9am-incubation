@@ -20,6 +20,7 @@ import com.open9am.service.Account;
 import com.open9am.service.CancelRequest;
 import com.open9am.service.CancelResponse;
 import com.open9am.service.Contract;
+import com.open9am.service.INamedService;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
 import com.open9am.service.TraderRuntimeException;
@@ -31,23 +32,23 @@ import java.util.Collection;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngineHandler {
+public interface ITraderEngineHandler extends INamedService {
 
-    void OnOrderReponse(OrderResponse response);
+    void onOrderReponse(OrderResponse response);
 
-    void OnCancelResponse(CancelResponse response);
+    void onCancelResponse(CancelResponse response);
 
-    void OnException(TraderRuntimeException exception);
+    void onException(TraderRuntimeException exception);
 
-    void OnException(OrderRequest request, TraderRuntimeException exception, int requestId);
+    void onException(OrderRequest request, TraderRuntimeException exception, int requestId);
 
-    void OnException(CancelRequest request, TraderRuntimeException exception, int requestId);
+    void onException(CancelRequest request, TraderRuntimeException exception, int requestId);
 
-    void OnStatusChange(EngineStatus status);
+    void onStatusChange(EngineStatus status);
 
-    void OnTraderServiceStatusChange(int status);
+    void onTraderServiceStatusChange(int status);
 
-    void OnErasingContracts(Collection<Contract> contracts);
+    void onErasingContracts(Collection<Contract> contracts);
 
-    void OnErasingAccount(Account account);
+    void onErasingAccount(Account account);
 }

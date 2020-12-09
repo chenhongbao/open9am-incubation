@@ -51,7 +51,22 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public void OnCancelResponse(CancelResponse response) {
+    public String getDescription() {
+        return "Default trader service handler implementation.";
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getCanonicalName();
+    }
+
+    @Override
+    public String getVersion() {
+        return "1.0";
+    }
+
+    @Override
+    public void onCancelResponse(CancelResponse response) {
         IDataConnection conn = null;
         try {
             preprocess(response);
@@ -122,14 +137,14 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
 
-    public void OnException(TraderRuntimeException exception) {
+    public void onException(TraderRuntimeException exception) {
         var handlers = info.getEngine().handlers();
         if (handlers.isEmpty()) {
             return;
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnException(exception);
+                h.onException(exception);
             }
             catch (Throwable th) {
                 callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
@@ -140,7 +155,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public void OnException(OrderRequest request,
+    public void onException(OrderRequest request,
                             TraderRuntimeException exception,
                             int requestId) {
         try {
@@ -151,7 +166,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
             cancel.setReason(CancelReason.INVALID_REQUEST);
             cancel.setStatusCode(exception.getCode());
             cancel.setStatusMessage(exception.getMessage());
-            OnCancelResponse(cancel);
+            onCancelResponse(cancel);
             /*
              * Call user handler.
              */
@@ -168,7 +183,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
 
-    public void OnException(CancelRequest request,
+    public void onException(CancelRequest request,
                             TraderRuntimeException exception,
                             int requestId) {
         callOnCancelException(request,
@@ -180,7 +195,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public void OnOrderReponse(OrderResponse response) {
+    public void onOrderReponse(OrderResponse response) {
         IDataConnection conn = null;
         try {
             preprocess(response);
@@ -266,14 +281,14 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public void OnStatusChange(int status) {
+    public void onStatusChange(int status) {
         var handlers = info.getEngine().handlers();
         if (handlers.isEmpty()) {
             return;
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnTraderServiceStatusChange(status);
+                h.onTraderServiceStatusChange(status);
             }
             catch (Throwable th) {
                 callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
@@ -290,7 +305,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnCancelResponse(response);
+                h.onCancelResponse(response);
             }
             catch (Throwable th) {
                 callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
@@ -309,7 +324,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnException(request,
+                h.onException(request,
                               exception,
                               requestId);
             }
@@ -323,7 +338,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     private void callOnException(TraderRuntimeException e) {
         try {
-            OnException(e);
+            onException(e);
         }
         catch (Throwable ignored) {
         }
@@ -338,7 +353,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnException(request,
+                h.onException(request,
                               exception,
                               requestId);
             }
@@ -357,7 +372,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
         handlers.parallelStream().forEach(h -> {
             try {
-                h.OnOrderReponse(response);
+                h.onOrderReponse(response);
             }
             catch (Throwable th) {
                 callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),

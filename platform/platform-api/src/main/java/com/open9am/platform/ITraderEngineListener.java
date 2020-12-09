@@ -6,6 +6,7 @@
 package com.open9am.platform;
 
 import com.open9am.engine.ITraderEngine;
+import com.open9am.service.INamedService;
 import java.util.Properties;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Properties;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngineListener {
+public interface ITraderEngineListener extends INamedService {
 
     void OnLoad(ITraderEngine engine);
 

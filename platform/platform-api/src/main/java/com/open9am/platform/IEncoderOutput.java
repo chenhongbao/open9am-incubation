@@ -7,8 +7,10 @@ package com.open9am.platform;
 
 /**
  *
- * @author chenh
+ * @author Hongbao Chen
+ * @since 1.0
  */
-public interface IActionHandler {
+public interface IEncoderOutput {
 
+    void write(byte[] binary);
 }

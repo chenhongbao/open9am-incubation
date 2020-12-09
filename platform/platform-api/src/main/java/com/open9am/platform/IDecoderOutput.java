@@ -7,8 +7,10 @@ package com.open9am.platform;
 
 /**
  *
- * @author chenh
+ * @author Hongbao Chen
+ * @since 1.0
  */
-public interface IRequestFilter {
+public interface IDecoderOutput {
 
+    <T> void write(T ouput, Class<T> clazz);
 }

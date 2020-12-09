@@ -14,17 +14,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.open9am.engine;
-
-import com.open9am.service.INamedService;
+package com.open9am.service;
 
 /**
- * Data source provides basic data to higher level.
+ * Service with name, version and description.
  *
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface IDataSource extends INamedService {
+public interface INamedService {
 
-    IDataConnection getConnection();
+    String getName();
+
+    String getVersion();
+
+    String getDescription();
 }

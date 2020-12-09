@@ -22,17 +22,17 @@ package com.open9am.service;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderServiceHandler {
+public interface ITraderServiceHandler extends INamedService {
 
-    void OnOrderReponse(OrderResponse response);
+    void onOrderReponse(OrderResponse response);
 
-    void OnCancelResponse(CancelResponse response);
+    void onCancelResponse(CancelResponse response);
 
-    void OnException(TraderRuntimeException exception);
+    void onException(TraderRuntimeException exception);
 
-    void OnException(OrderRequest request, TraderRuntimeException exception, int requestId);
+    void onException(OrderRequest request, TraderRuntimeException exception, int requestId);
 
-    void OnException(CancelRequest request, TraderRuntimeException exception, int requestId);
+    void onException(CancelRequest request, TraderRuntimeException exception, int requestId);
 
-    void OnStatusChange(int status);
+    void onStatusChange(int status);
 }

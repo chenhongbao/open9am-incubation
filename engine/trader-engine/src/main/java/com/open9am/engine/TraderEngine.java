@@ -108,6 +108,16 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
+    public String getDescription() {
+        return "Default trader engine implementation.";
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getCanonicalName();
+    }
+
+    @Override
     public Instrument getRelatedInstrument(String instrumentId) throws TraderException {
         return instruments.get(instrumentId);
     }
@@ -125,6 +135,11 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public Collection<TraderServiceRuntime> getTraderServiceRuntimes() throws TraderException {
         return new HashSet<>(traders.values());
+    }
+
+    @Override
+    public String getVersion() {
+        return "1.0";
     }
 
     @Override
@@ -321,11 +336,11 @@ public class TraderEngine implements ITraderEngine {
         }
         handlers.keySet().parallelStream().forEach(h -> {
             try {
-                h.OnErasingAccount(a);
+                h.onErasingAccount(a);
             }
             catch (Throwable th) {
                 try {
-                    h.OnException(new TraderRuntimeException(
+                    h.onException(new TraderRuntimeException(
                             ExceptionCodes.USER_CODE_ERROR.code(),
                             ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
@@ -342,11 +357,11 @@ public class TraderEngine implements ITraderEngine {
         }
         handlers.keySet().parallelStream().forEach(h -> {
             try {
-                h.OnErasingContracts(cs);
+                h.onErasingContracts(cs);
             }
             catch (Throwable th) {
                 try {
-                    h.OnException(new TraderRuntimeException(
+                    h.onException(new TraderRuntimeException(
                             ExceptionCodes.USER_CODE_ERROR.code(),
                             ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
@@ -367,11 +382,11 @@ public class TraderEngine implements ITraderEngine {
         }
         handlers.keySet().parallelStream().forEach(h -> {
             try {
-                h.OnException(e);
+                h.onException(e);
             }
             catch (Throwable th) {
                 try {
-                    h.OnException(new TraderRuntimeException(
+                    h.onException(new TraderRuntimeException(
                             ExceptionCodes.USER_CODE_ERROR.code(),
                             ExceptionCodes.USER_CODE_ERROR.message(),
                             th));
@@ -388,7 +403,7 @@ public class TraderEngine implements ITraderEngine {
         }
         handlers.keySet().parallelStream().forEach(h -> {
             try {
-                h.OnStatusChange(status);
+                h.onStatusChange(status);
             }
             catch (Throwable th) {
                 try {
@@ -446,7 +461,7 @@ public class TraderEngine implements ITraderEngine {
         r.setStatusCode(0);
 
         try {
-            h.OnCancelResponse(r);
+            h.onCancelResponse(r);
         }
         catch (Throwable th) {
             callOnException(new TraderRuntimeException(ExceptionCodes.CANCEL_ORDER_FAILED.code(),

@@ -7,8 +7,9 @@ package com.open9am.platform;
 
 /**
  *
- * @author chenh
+ * @author Hongbao Chen
+ * @since 1.0
  */
-public interface IResponseFilter {
+public enum PlatformStatus {
 
 }

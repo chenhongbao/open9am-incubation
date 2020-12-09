@@ -17,6 +17,7 @@
 package com.open9am.engine;
 
 import com.open9am.service.CancelRequest;
+import com.open9am.service.INamedService;
 import com.open9am.service.ITraderService;
 import com.open9am.service.Instrument;
 import com.open9am.service.OrderRequest;
@@ -30,7 +31,7 @@ import java.util.Properties;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngine {
+public interface ITraderEngine extends INamedService {
 
     void registerTrader(int traderId, ITraderService trader) throws TraderException;
 
