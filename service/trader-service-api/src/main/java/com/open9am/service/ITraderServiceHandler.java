@@ -22,7 +22,7 @@ package com.open9am.service;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderServiceHandler extends INamedService {
+public interface ITraderServiceHandler {
 
     void onOrderReponse(OrderResponse response);
 

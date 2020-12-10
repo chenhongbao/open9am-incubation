@@ -20,7 +20,6 @@ import com.open9am.service.Account;
 import com.open9am.service.CancelRequest;
 import com.open9am.service.CancelResponse;
 import com.open9am.service.Contract;
-import com.open9am.service.INamedService;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
 import com.open9am.service.TraderRuntimeException;
@@ -32,7 +31,7 @@ import java.util.Collection;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngineHandler extends INamedService {
+public interface ITraderEngineHandler {
 
     void onOrderReponse(OrderResponse response);
 

@@ -51,21 +51,6 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     }
 
     @Override
-    public String getDescription() {
-        return "Default trader service handler implementation.";
-    }
-
-    @Override
-    public String getName() {
-        return this.getClass().getCanonicalName();
-    }
-
-    @Override
-    public String getVersion() {
-        return "1.0";
-    }
-
-    @Override
     public void onCancelResponse(CancelResponse response) {
         IDataConnection conn = null;
         try {

@@ -14,19 +14,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.open9am.service;
+package com.open9am.platform;
 
 /**
- * Service with name, version and description.
  *
  * @author Hongbao Chen
- * @since 1.0
+ *
+ * @since 11.0
  */
-public interface INamedService {
+public interface ITimer {
 
-    String getName();
-
-    String getVersion();
-
-    String getDescription();
+    void cancel();
 }

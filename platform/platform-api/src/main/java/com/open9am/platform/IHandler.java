@@ -14,15 +14,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.open9am.engine;
+package com.open9am.platform;
+
+import java.util.Properties;
 
 /**
- * Data source provides basic data to higher level.
  *
  * @author Hongbao Chen
+ * @param <T>
+ *
  * @since 1.0
  */
-public interface IDataSource {
+public interface IHandler<T> {
 
-    IDataConnection getConnection();
+    void handle(T data, Properties properties);
 }

@@ -21,7 +21,6 @@ import com.open9am.service.CancelResponse;
 import com.open9am.service.Commission;
 import com.open9am.service.Contract;
 import com.open9am.service.Deposit;
-import com.open9am.service.INamedService;
 import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.Order;
@@ -39,7 +38,7 @@ import java.util.Properties;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngineAlgorithm extends INamedService {
+public interface ITraderEngineAlgorithm {
 
     Account getAccount(Account pre,
                        Collection<Deposit> deposits,

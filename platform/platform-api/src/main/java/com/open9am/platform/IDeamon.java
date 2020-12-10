@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.open9am.engine;
+package com.open9am.platform;
 
 /**
- * Data source provides basic data to higher level.
  *
  * @author Hongbao Chen
- * @since 1.0
+ * @sicne 1.0
  */
-public interface IDataSource {
+public interface IDeamon {
 
-    IDataConnection getConnection();
+    void terminate();
 }

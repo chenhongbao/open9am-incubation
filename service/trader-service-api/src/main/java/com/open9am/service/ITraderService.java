@@ -8,7 +8,7 @@ import java.util.Properties;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderService extends INamedService {
+public interface ITraderService {
 
     void start(Properties properties, ITraderServiceHandler handler) throws TraderException;
 

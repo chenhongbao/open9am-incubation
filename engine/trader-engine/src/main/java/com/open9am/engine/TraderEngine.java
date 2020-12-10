@@ -108,16 +108,6 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
-    public String getDescription() {
-        return "Default trader engine implementation.";
-    }
-
-    @Override
-    public String getName() {
-        return this.getClass().getCanonicalName();
-    }
-
-    @Override
     public Instrument getRelatedInstrument(String instrumentId) throws TraderException {
         return instruments.get(instrumentId);
     }
@@ -135,11 +125,6 @@ public class TraderEngine implements ITraderEngine {
     @Override
     public Collection<TraderServiceRuntime> getTraderServiceRuntimes() throws TraderException {
         return new HashSet<>(traders.values());
-    }
-
-    @Override
-    public String getVersion() {
-        return "1.0";
     }
 
     @Override
