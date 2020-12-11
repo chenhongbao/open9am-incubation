@@ -31,6 +31,7 @@ import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
 import com.open9am.service.OrderStatus;
 import com.open9am.service.OrderType;
+import com.open9am.service.Tick;
 import com.open9am.service.TraderException;
 import com.open9am.service.TraderRuntimeException;
 import com.open9am.service.utils.Utils;
@@ -40,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
@@ -134,7 +136,7 @@ public class TraderEngine implements ITraderEngine {
             check0();
             settle(ds, algo);
             var conn = ds.getConnection();
-            conn.updateAccount(getSettledAccount(properties));
+            conn.updateAccount(getSettledAccount());
             changeStatus(EngineStatus.WORKING);
         }
         catch (TraderException e) {
@@ -216,7 +218,7 @@ public class TraderEngine implements ITraderEngine {
         var type = request.getType();
         if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
             decideTrader(request);
-            checkAssetsOpen(request, instrument, properties);
+            checkAssetsOpen(request, instrument);
             forwardRequest(request, request.getTraderId(), requestId);
         }
         else {
@@ -514,7 +516,7 @@ public class TraderEngine implements ITraderEngine {
         return r;
     }
 
-    private void checkAssetsOpen(OrderRequest request, Instrument instrument, Properties properties)
+    private void checkAssetsOpen(OrderRequest request, Instrument instrument)
             throws TraderEngineAlgorithmException, DataSourceException, TraderException {
         checkVolumn(request.getVolumn());
         var a = algo.getAmount(request.getPrice(), instrument);
@@ -523,7 +525,7 @@ public class TraderEngine implements ITraderEngine {
                                instrument,
                                request.getType());
         var total = request.getVolumn() * (m + c);
-        var available = getAvailableMoney(properties);
+        var available = getAvailableMoney();
         if (available < total) {
             throw new TraderException(ExceptionCodes.INSUFFICIENT_MONEY.code(),
                                       ExceptionCodes.INSUFFICIENT_MONEY.message());
@@ -557,6 +559,34 @@ public class TraderEngine implements ITraderEngine {
         if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
             request.setTraderId(rt.getTraderId());
         }
+    }
+
+    private Map<String, Instrument> findRelatedInstruments(Collection<String> instrumentIds,
+                                                           IDataConnection conn) throws TraderException {
+        final var r = new HashMap<String, Instrument>(512);
+        for (var i : instrumentIds) {
+            var instrument = conn.getInstrumentById(i);
+            if (instrument == null) {
+                throw new TraderException(ExceptionCodes.INSTRUMENT_NULL.code(),
+                                          ExceptionCodes.INSTRUMENT_NULL.message() + "(" + i + ")");
+            }
+            r.put(i, instrument);
+        }
+        return r;
+    }
+
+    private Map<String, Tick> findRelatedTicks(Collection<String> instrumentIds,
+                                               IDataConnection conn) throws TraderException {
+        final var r = new HashMap<String, Tick>(512);
+        for (var i : instrumentIds) {
+            var instrument = conn.getTickByInstrumentId(i);
+            if (instrument == null) {
+                throw new TraderException(ExceptionCodes.TICK_NULL.code(),
+                                          ExceptionCodes.TICK_NULL.message() + "(" + i + ")");
+            }
+            r.put(i, instrument);
+        }
+        return r;
     }
 
     private Integer findTraderIdByOrderId(long orderId) throws TraderException {
@@ -662,8 +692,8 @@ public class TraderEngine implements ITraderEngine {
         return sorted;
     }
 
-    private double getAvailableMoney(Properties properties) throws DataSourceException, TraderEngineAlgorithmException {
-        var a = getSettledAccount(properties);
+    private double getAvailableMoney() throws TraderException {
+        var a = getSettledAccount();
         return (a.getBalance() - a.getMargin() - a.getFrozenMargin() - a.getFrozenCommission());
     }
 
@@ -699,16 +729,23 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private Account getSettledAccount(Properties properties)
-            throws DataSourceException, TraderEngineAlgorithmException {
+    private Collection<String> getRalatedInstrumentIds() {
+        return null;
+    }
+
+    private Account getSettledAccount() throws TraderException {
         final var conn = ds.getConnection();
+        final var tradingDay = conn.getTradingDay();
+        final var ids = getRalatedInstrumentIds();
         return algo.getAccount(conn.getAccount(),
                                conn.getDeposits(),
                                conn.getWithdraws(),
                                algo.getPositions(conn.getContracts(),
                                                  conn.getCommissions(),
                                                  conn.getMargins(),
-                                                 properties));
+                                                 findRelatedTicks(ids, conn),
+                                                 findRelatedInstruments(ids, conn),
+                                                 tradingDay));
     }
 
     private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {

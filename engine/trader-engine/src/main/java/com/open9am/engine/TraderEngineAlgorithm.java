@@ -32,6 +32,7 @@ import com.open9am.service.OrderStatus;
 import com.open9am.service.OrderType;
 import com.open9am.service.Position;
 import com.open9am.service.RatioType;
+import com.open9am.service.Tick;
 import com.open9am.service.Withdraw;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -40,7 +41,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -174,14 +174,15 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
     public Collection<Position> getPositions(Collection<Contract> contracts,
                                              Collection<Commission> commissions,
                                              Collection<Margin> margins,
-                                             Properties properties) throws TraderEngineAlgorithmException {
+                                             Map<String, Tick> ticks,
+                                             Map<String, Instrument> instruments,
+                                             LocalDate tradingDay) throws TraderEngineAlgorithmException {
         if (contracts == null) {
             throw new TraderEngineAlgorithmException(ExceptionCodes.CONTRACT_NULL.code(),
                                                      ExceptionCodes.CONTRACT_NULL.message());
         }
         final var ls = new HashMap<String, Position>(64);
         final var ss = new HashMap<String, Position>(64);
-        final var tradingDay = getDate("TradingDay", properties);
         /*
          * Store margins/commissions in map for constant access time.
          */
@@ -225,8 +226,8 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
             var ik = iid + ".Instrument";
             var margin = findMargin(cid, map);
             var commission = findCommission(cid, cmap);
-            var price = findPriceProperty(pk, properties);
-            var instrument = findInstrumentProperty(ik, properties);
+            var price = findPriceProperty(pk, ticks);
+            var instrument = findInstrumentProperty(ik, instruments);
             if (c.getOpenTradingDay().isBefore(tradingDay)) {
                 addPrePosition(p,
                                c,
@@ -641,14 +642,14 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
     }
 
     private Instrument findInstrumentProperty(String key,
-                                              Properties properties) throws TraderEngineAlgorithmException {
-        var v = getObject(key, properties);
-        if (!(v instanceof Instrument)) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.code(),
-                                                     ExceptionCodes.PROPERTY_WRONG_INSTRUMENT_TYPE.message()
+                                              Map<String, Instrument> instruments) throws TraderEngineAlgorithmException {
+        var v = instruments.get(key);
+        if (v == null) {
+            throw new TraderEngineAlgorithmException(ExceptionCodes.INSTRUMENT_NULL.code(),
+                                                     ExceptionCodes.INSTRUMENT_NULL.message()
                                                      + "(" + key + ")");
         }
-        return (Instrument) v;
+        return v;
     }
 
     private Margin findMargin(Long contractId, Map<Long, Margin> margins)
@@ -659,47 +660,24 @@ public class TraderEngineAlgorithm implements ITraderEngineAlgorithm {
                                                      ExceptionCodes.MARGIN_NULL.message()
                                                      + "(Contract ID:" + contractId + ")");
         }
-        if (!(v instanceof Margin)) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_MARGIN_TYPE.code(),
-                                                     ExceptionCodes.PROPERTY_WRONG_MARGIN_TYPE.message()
-                                                     + "(Contract ID:" + contractId + ")");
-        }
         return v;
     }
 
     private double findPriceProperty(String key,
-                                     Properties properties) throws TraderEngineAlgorithmException {
-        var v = getObject(key, properties);
-        if (!(v instanceof Double)) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_PRICE_TYPE.code(),
-                                                     ExceptionCodes.PROPERTY_WRONG_PRICE_TYPE.message()
-                                                     + "(" + key + ")");
-        }
-        return (Double) v;
-    }
-
-    private LocalDate getDate(String key, Properties properties) throws TraderEngineAlgorithmException {
-        var v = getObject(key, properties);
-        if (!(v instanceof LocalDate)) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_WRONG_DATE_TYPE.code(),
-                                                     ExceptionCodes.PROPERTY_WRONG_DATE_TYPE.message()
-                                                     + "(" + key + ")");
-        }
-        return (LocalDate) v;
-    }
-
-    private Object getObject(String key, Properties properties) throws TraderEngineAlgorithmException {
-        if (properties == null) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTIES_NULL.code(),
-                                                     ExceptionCodes.PROPERTIES_NULL.message());
-        }
-        var v = properties.get(key);
+                                     Map<String, Tick> ticks) throws TraderEngineAlgorithmException {
+        var v = ticks.get(key);
         if (v == null) {
-            throw new TraderEngineAlgorithmException(ExceptionCodes.PROPERTY_NOT_FOUND.code(),
-                                                     ExceptionCodes.PROPERTY_NOT_FOUND.message()
+            throw new TraderEngineAlgorithmException(ExceptionCodes.TICK_NULL.code(),
+                                                     ExceptionCodes.TICK_NULL.message()
                                                      + "(" + key + ")");
         }
-        return v;
+        var p = v.getPrice();
+        if (p == null) {
+            throw new TraderEngineAlgorithmException(ExceptionCodes.PRICE_NULL.code(),
+                                                     ExceptionCodes.PRICE_NULL.message()
+                                                     + "(" + key + ")");
+        }
+        return p;
     }
 
     private void setOrderStatus(Order order) throws TraderEngineAlgorithmException {

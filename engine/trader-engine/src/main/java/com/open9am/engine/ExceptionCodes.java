@@ -63,10 +63,9 @@ public enum ExceptionCodes {
     PREPROC_RSPS_FAILED(0x28, "Preprocess response failed."),
     PROPERTIES_NULL(0x29, "Properties null."),
     PROPERTY_NOT_FOUND(0x2A, "Property not found."),
-    PROPERTY_WRONG_DATE_TYPE(0x2B, "Wrong date type in properties."),
-    PROPERTY_WRONG_PRICE_TYPE(0x2B, "Wrong price type in properties."),
-    PROPERTY_WRONG_INSTRUMENT_TYPE(0x2C, "Wrong instrument type in properties."),
-    PROPERTY_WRONG_MARGIN_TYPE(0x2D, "Wrong margin type in propertoes."),
+    INVALID_REQUEST_INSTANCE(0x2B, "Invalid request instance."),
+    TICK_NULL(0x2C, "Tick null."),
+    PRICE_NULL(0x2D, "Price null."),
     CONTRACT_STATUS_NULL(0x2E, "Contract status null."),
     INVALID_CONTRACT_STATUS(0x2F, "Invalid contract status."),
     RATIO_TYPE_NULL(0x30, "Ratio type null."),
@@ -90,8 +89,7 @@ public enum ExceptionCodes {
     TRANSACTION_COMMIT_FAILED(0x42, "Transaction commit failed."),
     TRANSACTION_BEGIN_FAILED(0x43, "JDBC transaction begin failed."),
     TRANSACTION_RESTORE_FAILED(0x44, "JDBC transaction store failed."),
-    TRANSACTION_ROLLBACK_FAILED(0x45, "JDBC tranaction rollback failed."),
-    INVALID_REQUEST_INSTANCE(0x46, "Invalid request instance.");
+    TRANSACTION_ROLLBACK_FAILED(0x45, "JDBC tranaction rollback failed.");
 
     private final int code;
     private final String message;

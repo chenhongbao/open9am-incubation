@@ -28,6 +28,7 @@ import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
+import com.open9am.service.Tick;
 import com.open9am.service.Withdraw;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -100,6 +101,11 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
+    public void addTick(Tick tick) throws DataSourceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public void addWithdraw(Withdraw withdraw) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -125,7 +131,7 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public CancelRequest getCancelRequest(long orderId) throws DataSourceException {
+    public CancelRequest getCancelRequestByOrderId(long orderId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -195,7 +201,7 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public Instrument getInstrument(String instrumentId) throws DataSourceException {
+    public Instrument getInstrumentById(String instrumentId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -245,6 +251,11 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
+    public Tick getTickByInstrumentId(String instrumentId) throws DataSourceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public LocalDate getTradingDay() throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
@@ -276,6 +287,11 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     @Override
     public void removeMargin(long marginId) throws DataSourceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeTick(String instrumentId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -330,6 +346,11 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     @Override
     public void updateMargin(Margin margin) throws DataSourceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void updateTick(Tick tick) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

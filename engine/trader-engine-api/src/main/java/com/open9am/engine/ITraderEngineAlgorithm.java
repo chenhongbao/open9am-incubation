@@ -28,9 +28,11 @@ import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
 import com.open9am.service.OrderType;
 import com.open9am.service.Position;
+import com.open9am.service.Tick;
 import com.open9am.service.Withdraw;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Properties;
+import java.util.Map;
 
 /**
  * Algorithms.
@@ -40,20 +42,11 @@ import java.util.Properties;
  */
 public interface ITraderEngineAlgorithm {
 
-    Account getAccount(Account pre,
-                       Collection<Deposit> deposits,
-                       Collection<Withdraw> withdraws,
-                       Collection<Position> positions) throws TraderEngineAlgorithmException;
+    Account getAccount(Account pre, Collection<Deposit> deposits, Collection<Withdraw> withdraws, Collection<Position> positions) throws TraderEngineAlgorithmException;
 
-    Collection<Position> getPositions(Collection<Contract> contracts,
-                                      Collection<Commission> commissions,
-                                      Collection<Margin> margins,
-                                      Properties properties) throws TraderEngineAlgorithmException;
+    Collection<Position> getPositions(Collection<Contract> contracts, Collection<Commission> commissions, Collection<Margin> margins, Map<String, Tick> ticks, Map<String, Instrument> instruments, LocalDate tradingDay) throws TraderEngineAlgorithmException;
 
-    Order getOrder(OrderRequest request,
-                   Collection<Contract> contracts,
-                   Collection<OrderResponse> trades,
-                   Collection<CancelResponse> cancels) throws TraderEngineAlgorithmException;
+    Order getOrder(OrderRequest request, Collection<Contract> contracts, Collection<OrderResponse> trades, Collection<CancelResponse> cancels) throws TraderEngineAlgorithmException;
 
     double getAmount(double price, Instrument instrument) throws TraderEngineAlgorithmException;
 

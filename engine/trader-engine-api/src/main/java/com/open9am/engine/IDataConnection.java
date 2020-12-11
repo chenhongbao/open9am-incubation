@@ -28,6 +28,7 @@ import com.open9am.service.Instrument;
 import com.open9am.service.Margin;
 import com.open9am.service.OrderRequest;
 import com.open9am.service.OrderResponse;
+import com.open9am.service.Tick;
 import com.open9am.service.Withdraw;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -98,7 +99,7 @@ public interface IDataConnection {
 
     Collection<Instrument> getInstrumentsByExchangeId(String exchangeId) throws DataSourceException;
 
-    Instrument getInstrument(String instrumentId) throws DataSourceException;
+    Instrument getInstrumentById(String instrumentId) throws DataSourceException;
 
     void addInstrument(Instrument instrument) throws DataSourceException;
 
@@ -114,7 +115,7 @@ public interface IDataConnection {
 
     Collection<CancelRequest> getCancelRequests() throws DataSourceException;
 
-    CancelRequest getCancelRequest(long orderId) throws DataSourceException;
+    CancelRequest getCancelRequestByOrderId(long orderId) throws DataSourceException;
 
     void addCancelRequest(CancelRequest request) throws DataSourceException;
 
@@ -129,6 +130,14 @@ public interface IDataConnection {
     Collection<CancelResponse> getCancelResponseByOrderId(long orderId) throws DataSourceException;
 
     void addCancelResponse(CancelResponse response) throws DataSourceException;
+
+    Tick getTickByInstrumentId(String instrumentId) throws DataSourceException;
+
+    void addTick(Tick tick) throws DataSourceException;
+
+    void removeTick(String instrumentId) throws DataSourceException;
+
+    void updateTick(Tick tick) throws DataSourceException;
 
     LocalDate getTradingDay() throws DataSourceException;
 
