@@ -16,8 +16,6 @@
  */
 package com.open9am.platform;
 
-import java.util.Properties;
-
 /**
  *
  * @author Hongbao Chen
@@ -27,5 +25,5 @@ import java.util.Properties;
  */
 public interface IHandler<T> {
 
-    void handle(T data, Properties properties);
+    void handle(T data, ISession session);
 }

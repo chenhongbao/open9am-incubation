@@ -16,8 +16,6 @@
  */
 package com.open9am.platform;
 
-import java.util.Properties;
-
 /**
  *
  * @author Hongbao Chen
@@ -27,5 +25,5 @@ import java.util.Properties;
  */
 public interface IEncoder<T> {
 
-    void encode(T object, Properties properties, IEncoderOutput out);
+    void encode(T object, ISession session, IEncoderOutput out);
 }

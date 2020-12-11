@@ -30,4 +30,6 @@ public interface IDisruptor<T> {
     IDisruptor<T> apply(IHandler<T> handler);
 
     IDisruptor<T> then(IHandler<T> handler);
+
+    void dispose();
 }

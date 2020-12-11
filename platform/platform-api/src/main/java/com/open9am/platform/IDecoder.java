@@ -17,7 +17,6 @@
 package com.open9am.platform;
 
 import java.nio.ByteBuffer;
-import java.util.Properties;
 
 /**
  *
@@ -27,7 +26,7 @@ import java.util.Properties;
  */
 public interface IDecoder {
 
-    void decode(String text, Properties properties, IDecoderOutput out, boolean isLast);
+    void decode(String text, ISession session, IDecoderOutput out, boolean isLast);
 
-    void decode(ByteBuffer buffer, Properties properties, IDecoderOutput out, boolean isLast);
+    void decode(ByteBuffer buffer, ISession session, IDecoderOutput out, boolean isLast);
 }

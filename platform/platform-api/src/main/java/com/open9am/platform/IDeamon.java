@@ -23,5 +23,5 @@ package com.open9am.platform;
  */
 public interface IDeamon {
 
-    void terminate();
+    void dispose();
 }

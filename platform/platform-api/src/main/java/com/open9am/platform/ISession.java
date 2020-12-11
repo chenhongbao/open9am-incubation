@@ -19,10 +19,12 @@ package com.open9am.platform;
 /**
  *
  * @author Hongbao Chen
- *
- * @since 11.0
+ * @since 1.0
  */
-public interface ITimer {
+public interface ISession {
 
-    void dispose();
+    Object get(Object key);
+
+    void set(Object key, Object value);
+
 }

@@ -16,6 +16,7 @@
  */
 package com.open9am.platform;
 
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimerTask;
@@ -30,6 +31,12 @@ import java.util.concurrent.TimeUnit;
 public interface IPlatform {
 
     void setDecoder(IDecoder decoder) throws PlatformException;
+
+    void decode(String input) throws PlatformException;
+
+    void decode(ByteBuffer buffer) throws PlatformException;
+
+    <T> void handle(T input, Class<T> clazz) throws PlatformException;
 
     <T> void add(IEncoder<T> encoder, Class<T> clazz) throws PlatformException;
 
