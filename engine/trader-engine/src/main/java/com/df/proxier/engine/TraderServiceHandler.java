@@ -16,7 +16,6 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.CancelReason;
 import com.df.proxier.CancelRequest;
 import com.df.proxier.CancelResponse;
 import com.df.proxier.Commission;
@@ -148,7 +147,6 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
              * Call cancel handler to cancel a bad request.
              */
             var cancel = initCancelResponse(request);
-            cancel.setReason(CancelReason.INVALID_REQUEST);
             cancel.setStatusCode(exception.getCode());
             cancel.setStatusMessage(exception.getMessage());
             onCancelResponse(cancel);

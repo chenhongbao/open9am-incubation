@@ -17,7 +17,6 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelReason;
 import com.df.proxier.CancelRequest;
 import com.df.proxier.CancelResponse;
 import com.df.proxier.Commission;
@@ -444,7 +443,6 @@ public class TraderEngine implements ITraderEngine {
         r.setTraderId(traderId);
         r.setTradingDay(rt.getTrader().getServiceInfo().getTradingDay());
         r.setUuid(Utils.nextUuid().toString());
-        r.setReason(CancelReason.MARKET_CLOSE);
         r.setStatusCode(0);
 
         try {

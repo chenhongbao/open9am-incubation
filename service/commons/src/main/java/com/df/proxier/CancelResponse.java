@@ -29,7 +29,6 @@ public class CancelResponse {
 
     private String instrumentId;
     private Long orderId;
-    private CancelReason reason;
     private Integer statusCode;
     private String statusMessage;
     private ZonedDateTime timestamp;
@@ -54,14 +53,6 @@ public class CancelResponse {
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
-    }
-
-    public CancelReason getReason() {
-        return reason;
-    }
-
-    public void setReason(CancelReason reason) {
-        this.reason = reason;
     }
 
     public Integer getStatusCode() {
