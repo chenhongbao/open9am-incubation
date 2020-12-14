@@ -17,7 +17,13 @@
 package com.df.proxier.dba;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  *
@@ -27,36 +33,84 @@ import java.util.Collection;
 class Query implements IQuery {
 
     private final Connection conn;
-    private final MetaTable meta;
+    private final Map<String, MetaTable<?>> meta;
 
-    Query(Connection connection, MetaTable table) {
-
+    Query(Connection connection) {
         conn = connection;
-        meta = table;
+        meta = new HashMap<>(64);
     }
 
     @Override
-    public <T> int insert(Class<T> clazz, T object) {
-        // TODO insert
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> int insert(Class<T> clazz, T object) throws SQLException {
+        return execute(getInsertSql(findMeta(clazz), object));
     }
 
     @Override
-    public <T> int remove(Class<T> clazz, ICondition condition) {
-        // TODO remove
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> int remove(Class<T> clazz, ICondition condition) throws SQLException {
+        return execute(getRemoveSql(findMeta(clazz), condition));
     }
 
     @Override
-    public <T> Collection<T> select(Class<T> clazz, ICondition condition) {
-        // TODO select
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> Collection<T> select(Class<T> clazz,
+                                    ICondition condition,
+                                    IDefaultFactory<T> factory) throws SQLException,
+                                                                       ReflectiveOperationException {
+        var m = findMeta(clazz);
+        return executeSelect(m, getSelectSql(m, condition), factory);
     }
 
     @Override
-    public <T> int update(Class<T> clazz, T object, ICondition condition) {
-        // TODO update
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <T> int update(Class<T> clazz, T object, ICondition condition) throws SQLException {
+        return execute(getUpdateSql(findMeta(clazz), object, condition));
+    }
+
+    private <T> Collection<T> convert(MetaTable<T> meta,
+                                      ResultSet rs,
+                                      IDefaultFactory<T> factory) throws ReflectiveOperationException {
+        Collection<T> c = new LinkedList<>();
+        @SuppressWarnings("unchecked")
+        T r = factory.contruct();
+        // TODO parse result set to collection.
+        return c;
+    }
+
+    private int execute(String sql) throws SQLException {
+        try (Statement stat = conn.createStatement()) {
+            stat.execute(sql);
+            return stat.getUpdateCount();
+        }
+    }
+
+    private <T> Collection<T> executeSelect(MetaTable<T> meta,
+                                            String sql,
+                                            IDefaultFactory<T> factory) throws SQLException,
+                                                                               ReflectiveOperationException {
+        ResultSet rs;
+        try (Statement stat = conn.createStatement()) {
+            rs = stat.executeQuery(sql);
+            return convert(meta, rs, factory);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> MetaTable<T> findMeta(Class<T> clazz) {
+        return (MetaTable<T>) meta.computeIfAbsent(clazz.getCanonicalName(), k -> new MetaTable<T>(clazz));
+    }
+
+    private <T> String getInsertSql(MetaTable<T> meta, Object object) {
+        return ""; // TODO getInsertSql
+    }
+
+    private <T> String getRemoveSql(MetaTable<T> meta, ICondition condition) {
+        return ""; // TODO getRemoveSql
+    }
+
+    private <T> String getSelectSql(MetaTable<T> meta, ICondition condition) {
+        return ""; // TODO getSelectSql
+    }
+
+    private <T> String getUpdateSql(MetaTable<T> meta, Object object, ICondition condition) {
+        return ""; // TODO getUpdateSql
     }
 
 }

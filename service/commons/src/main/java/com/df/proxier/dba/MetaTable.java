@@ -24,13 +24,13 @@ import java.util.List;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class MetaTable {
+public class MetaTable<T> {
 
     private final List<MetaField> fields;
     private final String name;
-    private final Class<?> type;
+    private final Class<T> type;
 
-    public MetaTable(Class<?> clazz) {
+    public MetaTable(Class<T> clazz) {
         type = clazz;
         fields = new LinkedList<>();
         name = clazz.getSimpleName();
@@ -49,7 +49,7 @@ public class MetaTable {
         return type;
     }
 
-    private void parseFields(Class<?> clazz) {
+    private void parseFields(Class<T> clazz) {
         DbaUtils.inspectFields(clazz).forEach(f -> {
             fields.add(f);
         });

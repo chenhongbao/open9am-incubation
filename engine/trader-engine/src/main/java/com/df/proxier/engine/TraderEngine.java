@@ -24,7 +24,6 @@ import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
 import com.df.proxier.FeeStatus;
-import com.df.proxier.service.ITraderService;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
 import com.df.proxier.OrderRequest;
@@ -32,6 +31,7 @@ import com.df.proxier.OrderResponse;
 import com.df.proxier.OrderStatus;
 import com.df.proxier.OrderType;
 import com.df.proxier.Tick;
+import com.df.proxier.service.ITraderService;
 import com.df.proxier.service.TraderException;
 import com.df.proxier.service.TraderRuntimeException;
 import com.df.proxier.utils.Utils;
@@ -443,7 +443,7 @@ public class TraderEngine implements ITraderEngine {
         r.setOrderId(orderId);
         r.setTraderId(traderId);
         r.setTradingDay(rt.getTrader().getServiceInfo().getTradingDay());
-        r.setUuid(Utils.getUuid().toString());
+        r.setUuid(Utils.nextUuid().toString());
         r.setReason(CancelReason.MARKET_CLOSE);
         r.setStatusCode(0);
 
@@ -855,7 +855,7 @@ public class TraderEngine implements ITraderEngine {
              */
             var cms = new Commission();
             cms.setCommission(commission);
-            cms.setCommissionId(Utils.getId());
+            cms.setCommissionId(Utils.nextId());
             cms.setContractId(contract.getContractId());
             cms.setStatus(FeeStatus.FORZEN);
             cms.setTradingDay(tradingDay);
@@ -890,7 +890,7 @@ public class TraderEngine implements ITraderEngine {
              * Add preparing contract.
              */
             var ctr = new Contract();
-            ctr.setContractId(Utils.getId());
+            ctr.setContractId(Utils.nextId());
             ctr.setTraderId(request.getTraderId());
             ctr.setInstrumentId(request.getInstrumentId());
             ctr.setOpenAmount(amount);
@@ -903,7 +903,7 @@ public class TraderEngine implements ITraderEngine {
              */
             var cmn = new Commission();
             cmn.setCommission(commission);
-            cmn.setCommissionId(Utils.getId());
+            cmn.setCommissionId(Utils.nextId());
             cmn.setContractId(ctr.getContractId());
             cmn.setOrderId(request.getOrderId());
             cmn.setStatus(FeeStatus.FORZEN);
@@ -916,7 +916,7 @@ public class TraderEngine implements ITraderEngine {
             var mn = new Margin();
             mn.setContractId(ctr.getContractId());
             mn.setMargin(margin);
-            mn.setMarginId(Utils.getId());
+            mn.setMarginId(Utils.nextId());
             mn.setOrderId(request.getOrderId());
             mn.setStatus(FeeStatus.FORZEN);
             mn.setTradingDay(tradingDay);

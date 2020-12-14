@@ -16,12 +16,22 @@
  */
 package com.df.proxier.dba;
 
+import java.lang.reflect.Field;
+
 /**
  *
  * @author Hongbao Chen
+ * @param <T>
+ *
  * @since 1.0
  */
-public interface ICondition {
+public interface ICondition<T> {
 
-    String getSqlFragement();
+    Field getField();
+
+    T getValue0();
+
+    T getValue1();
+
+    ConditionType getType();
 }

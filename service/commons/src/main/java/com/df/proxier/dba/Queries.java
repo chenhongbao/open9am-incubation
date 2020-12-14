@@ -26,20 +26,60 @@ import java.sql.Connection;
  */
 public class Queries {
 
-    public static IQuery createQuery(Connection dbConnection, MetaTable meta) {
-        return null;
+    public static ICondition<ICondition<?>> and(ICondition<?> c0, ICondition<?> c1) {
+        throw new UnsupportedOperationException("Not supported.");
     }
 
-    public static ICondition equals(Field field, Long value) {
-        return new Condition(field, value);
+    public static IQuery createQuery(Connection dbConnection) {
+        return new Query(dbConnection);
     }
 
-    public static ICondition equals(Field field, Integer value) {
-        return new Condition(field, value);
+    public static ICondition<Long> equals(Field field, Long value) {
+        return new Condition<>(field, value, ConditionType.EQUALS);
     }
 
-    public static ICondition equals(Field field, String value) {
-        return new Condition(field, value);
+    public static ICondition<Integer> equals(Field field, Integer value) {
+        return new Condition<>(field, value, ConditionType.EQUALS);
+    }
+
+    public static ICondition<String> equals(Field field, String value) {
+        return new Condition<>(field, value, ConditionType.EQUALS);
+    }
+
+    public static ICondition<String> like(Field field, String pattern) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<ICondition<?>> not(ICondition<?> condition) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<ICondition<?>> or(ICondition<?> c0, ICondition<?> c1) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<Long> lessThan(Field field, Long value) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<Integer> lessThan(Field field, Integer value) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<String> lessThan(Field field, String value) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<Long> largerThan(Field field, Long value) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<Integer> largerThan(Field field, Integer value) {
+        throw new UnsupportedOperationException("Not supported.");
+    }
+
+    public static ICondition<String> largerThan(Field field, String value) {
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     private Queries() {

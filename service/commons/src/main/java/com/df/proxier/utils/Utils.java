@@ -21,11 +21,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class Utils {
 
-    private static final AtomicLong ID = new AtomicLong(0);
-    private static final long SYSTEM_SERIAL = Math.abs(getUuid().getLeastSignificantBits())
-                                              + System.currentTimeMillis();
+    private static final AtomicLong AUTO_INC = new AtomicLong(0);
+    private static final AtomicLong EXECUTION_ID = new AtomicLong();
 
     @SuppressWarnings("unchecked")
+
     public static <T> T copy(T copied) {
         try (ByteArrayOutputStream bo = new ByteArrayOutputStream()) {
             new ObjectOutputStream(bo).writeObject(copied);
@@ -37,16 +37,29 @@ public class Utils {
         }
     }
 
+    public synchronized static long getExecutionId() {
+        // TODO getSystemSerialNumber
+        if (EXECUTION_ID.get() == 0L) {
+            var n = nextUuid().getLeastSignificantBits() >> 32;
+            EXECUTION_ID.set(n);
+        }
+        return EXECUTION_ID.get();
+    }
+
     /**
      * Get incremental ID.
      *
      * @return auto-incremental ID
      */
-    public synchronized static Long getId() {
-        return SYSTEM_SERIAL + ID.incrementAndGet();
+    public static Long nextId() {
+        return (getExecutionId() << 32) + AUTO_INC.incrementAndGet();
     }
 
-    public static UUID getUuid() {
+    /**
+     *
+     * @return
+     */
+    public static UUID nextUuid() {
         return UUID.randomUUID();
     }
 

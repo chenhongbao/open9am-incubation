@@ -23,12 +23,12 @@ import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
 import com.df.proxier.FeeStatus;
-import com.df.proxier.service.ITraderServiceHandler;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
 import com.df.proxier.OrderRequest;
 import com.df.proxier.OrderResponse;
 import com.df.proxier.OrderType;
+import com.df.proxier.service.ITraderServiceHandler;
 import com.df.proxier.service.TraderException;
 import com.df.proxier.service.TraderRuntimeException;
 import com.df.proxier.utils.Utils;
@@ -559,7 +559,7 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         r.setOrderId(request.getOrderId());
         r.setTraderId(request.getTraderId());
         r.setTradingDay(info.getTrader().getServiceInfo().getTradingDay());
-        r.setUuid(Utils.getUuid().toString());
+        r.setUuid(Utils.nextUuid().toString());
         return r;
     }
 

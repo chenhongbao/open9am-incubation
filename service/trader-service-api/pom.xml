@@ -32,7 +32,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.open9am.service</groupId>
+            <groupId>com.df.proxier</groupId>
             <artifactId>commons</artifactId>
             <version>1.0</version>
         </dependency>
