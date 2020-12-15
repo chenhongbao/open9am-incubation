@@ -76,9 +76,32 @@ public class DbaUtils {
         else if (clazz == ZonedDateTime.class) {
             return Types.TIMESTAMP_WITH_TIMEZONE;
         }
-        else {
+        else if (clazz == String.class) {
             return Types.CHAR;
         }
+        else {
+            throw new UnsupportedOperationException(
+                    "Field type " + clazz.getCanonicalName() + " is not supported.");
+        }
+    }
+
+    public static String convertSqlType(int semanticType) {
+        switch (semanticType) {
+            case Types.BIGINT:
+                return "BIGINT";
+            case Types.INTEGER:
+                return "INT";
+            case Types.DECIMAL:
+                return "DECIMAL(38, 19)";
+            case Types.DATE:
+                return "CHAR(10)";
+            case Types.TIMESTAMP_WITH_TIMEZONE:
+                return "CHAR(64)";
+            case Types.CHAR:
+                return "CHAR(128)";
+        }
+        throw new UnsupportedOperationException(
+                "Semantic field type " + semanticType + " is not supported.");
     }
 
     private static List<String> split(String name) {

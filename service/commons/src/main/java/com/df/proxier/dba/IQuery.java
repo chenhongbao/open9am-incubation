@@ -26,11 +26,11 @@ import java.util.Collection;
  */
 public interface IQuery {
 
-    <T> Collection<T> select(Class<T> clazz, ICondition condition, IDefaultFactory<T> factory) throws SQLException, ReflectiveOperationException;
+    <T> Collection<T> select(Class<T> clazz, ICondition<?> condition, IDefaultFactory<T> factory) throws SQLException, ReflectiveOperationException;
 
-    <T> int update(Class<T> clazz, T object, ICondition condition) throws SQLException;
+    <T> int update(Class<T> clazz, T object, ICondition<?> condition) throws SQLException;
 
     <T> int insert(Class<T> clazz, T object) throws SQLException;
 
-    <T> int remove(Class<T> clazz, ICondition condition) throws SQLException;
+    <T> int remove(Class<T> clazz, ICondition<?> condition) throws SQLException;
 }

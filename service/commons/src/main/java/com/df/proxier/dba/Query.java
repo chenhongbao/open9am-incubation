@@ -17,9 +17,13 @@
 package com.df.proxier.dba;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,13 +50,13 @@ class Query implements IQuery {
     }
 
     @Override
-    public <T> int remove(Class<T> clazz, ICondition condition) throws SQLException {
+    public <T> int remove(Class<T> clazz, ICondition<?> condition) throws SQLException {
         return execute(getRemoveSql(findMeta(clazz), condition));
     }
 
     @Override
     public <T> Collection<T> select(Class<T> clazz,
-                                    ICondition condition,
+                                    ICondition<?> condition,
                                     IDefaultFactory<T> factory) throws SQLException,
                                                                        ReflectiveOperationException {
         var m = findMeta(clazz);
@@ -60,18 +64,61 @@ class Query implements IQuery {
     }
 
     @Override
-    public <T> int update(Class<T> clazz, T object, ICondition condition) throws SQLException {
+    public <T> int update(Class<T> clazz,
+                          T object,
+                          ICondition<?> condition) throws SQLException {
         return execute(getUpdateSql(findMeta(clazz), object, condition));
     }
 
     private <T> Collection<T> convert(MetaTable<T> meta,
                                       ResultSet rs,
-                                      IDefaultFactory<T> factory) throws ReflectiveOperationException {
+                                      IDefaultFactory<T> factory) throws ReflectiveOperationException,
+                                                                         SQLException {
         Collection<T> c = new LinkedList<>();
+        while (rs.next()) {
+            c.add(rowT(meta, rs, factory));
+        }
+        return c;
+    }
+
+    private <T> T rowT(MetaTable<T> meta, ResultSet rs, IDefaultFactory<T> factory) throws SQLException {
         @SuppressWarnings("unchecked")
         T r = factory.contruct();
-        // TODO parse result set to collection.
-        return c;
+        for (var f : meta.fields()) {
+            setField(f, r, rs);
+        }
+        return r;
+    }
+
+    private void setField(MetaField field, Object object, ResultSet rs) throws SQLException {
+        var f = field.getField();
+        var n = field.getName();
+        try {
+            switch (field.getType()) {
+                case Types.BIGINT:
+                    f.setLong(object, rs.getLong(n));
+                    break;
+                case Types.INTEGER:
+                    f.setInt(object, rs.getInt(n));
+                    break;
+                case Types.DECIMAL:
+                    f.setDouble(object, rs.getDouble(n));
+                    break;
+                case Types.DATE:
+                    var ds = rs.getString(n);
+                    f.set(object, ds != null ? LocalDate.parse(ds) : null);
+                    break;
+                case Types.TIMESTAMP_WITH_TIMEZONE:
+                    var ts = rs.getString(n);
+                    f.set(object, ts != null ? ZonedDateTime.parse(ts) : null);
+                    break;
+                case Types.CHAR:
+                    f.set(object, rs.getString(n));
+            }
+        }
+        catch (IllegalAccessException | IllegalArgumentException e) {
+            throw new NoSuchFieldError("Fail setting field '" + f.getName() + "'.");
+        }
     }
 
     private int execute(String sql) throws SQLException {
@@ -95,6 +142,64 @@ class Query implements IQuery {
     @SuppressWarnings("unchecked")
     private <T> MetaTable<T> findMeta(Class<T> clazz) {
         return (MetaTable<T>) meta.computeIfAbsent(clazz.getCanonicalName(), k -> new MetaTable<T>(clazz));
+    }
+
+    private <T> void ensureTable(MetaTable<T> meta) throws SQLException,
+                                                           DbaException {
+        var dbm = conn.getMetaData();
+        if (!hasTableName(meta, dbm)) {
+            createTable(meta);
+        }
+        else {
+            verifyTableColumns(meta, dbm);
+        }
+    }
+
+    private <T> boolean hasTableName(MetaTable<T> meta, DatabaseMetaData dbMeta) throws SQLException {
+        try (var rs = dbMeta.getTables("", "", meta.getName(), null)) {
+            return rs.next();
+        }
+    }
+
+    private <T> void verifyTableColumns(MetaTable<T> meta, DatabaseMetaData dbMeta) throws SQLException,
+                                                                                           DbaException {
+        var m = getTableColumns(meta.getName(), dbMeta);
+        for (var f : meta.fields()) {
+            var type = m.get(f.getName());
+            if (type == null) {
+                throw new DbaException("Field " + f.getName() + " not found in table.");
+            }
+            else if (!equalsType(type, f.getType())) {
+                throw new DbaException("Field " + f.getName() + " has wrong type.");
+            }
+        }
+    }
+
+    private boolean equalsType(int columnType, int semanticType) throws DbaException {
+        switch (semanticType) {
+            case Types.CHAR:
+            case Types.BIGINT:
+            case Types.INTEGER:
+            case Types.DECIMAL:
+                return columnType == semanticType;
+            case Types.DATE:
+            case Types.TIMESTAMP_WITH_TIMEZONE:
+                return columnType == Types.CHAR;
+        }
+        throw new DbaException("Invalid field type in table metadata.");
+    }
+
+    private Map<String, Integer> getTableColumns(String name, DatabaseMetaData dbMeta) throws SQLException {
+        var t = new HashMap<String, Integer>(128);
+        var cs = dbMeta.getColumns("", "", name, "%");
+        while (cs.next()) {
+            t.put(cs.getString("COLUMN_NAME"), cs.getInt("DATA_TYPE"));
+        }
+        return t;
+    }
+
+    private <T> void createTable(MetaTable<T> meta) {
+        // TODO createTable
     }
 
     private <T> String getInsertSql(MetaTable<T> meta, Object object) {
