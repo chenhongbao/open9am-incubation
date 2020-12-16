@@ -45,29 +45,48 @@ class Query implements IQuery {
     }
 
     @Override
-    public <T> int insert(Class<T> clazz, T object) throws SQLException {
-        return execute(getInsertSql(findMeta(clazz), object));
+    public <T> int insert(Class<T> clazz, T object) throws DbaException {
+        try {
+            return execute(getInsertSql(findMeta(clazz), object));
+        }
+        catch (SQLException ex) {
+            throw new DbaException("Fail executing insertion.", ex);
+        }
     }
 
     @Override
-    public <T> int remove(Class<T> clazz, ICondition<?> condition) throws SQLException {
-        return execute(getRemoveSql(findMeta(clazz), condition));
+    public <T> int remove(Class<T> clazz, ICondition<?> condition) throws DbaException {
+        try {
+            return execute(getRemoveSql(findMeta(clazz), condition));
+        }
+        catch (SQLException ex) {
+            throw new DbaException("Fail executing removal.", ex);
+        }
     }
 
     @Override
     public <T> Collection<T> select(Class<T> clazz,
                                     ICondition<?> condition,
-                                    IDefaultFactory<T> factory) throws SQLException,
-                                                                       ReflectiveOperationException {
-        var m = findMeta(clazz);
-        return executeSelect(m, getSelectSql(m, condition), factory);
+                                    IDefaultFactory<T> factory) throws DbaException {
+        try {
+            var m = findMeta(clazz);
+            return executeSelect(m, getSelectSql(m, condition), factory);
+        }
+        catch (SQLException | ReflectiveOperationException ex) {
+            throw new DbaException("Fail executing selection.", ex);
+        }
     }
 
     @Override
     public <T> int update(Class<T> clazz,
                           T object,
-                          ICondition<?> condition) throws SQLException {
-        return execute(getUpdateSql(findMeta(clazz), object, condition));
+                          ICondition<?> condition) throws DbaException {
+        try {
+            return execute(getUpdateSql(findMeta(clazz), object, condition));
+        }
+        catch (SQLException ex) {
+            throw new DbaException("Fail executing update.", ex);
+        }
     }
 
     private <T> Collection<T> convert(MetaTable<T> meta,
@@ -198,23 +217,60 @@ class Query implements IQuery {
         return t;
     }
 
-    private <T> void createTable(MetaTable<T> meta) {
-        // TODO createTable
+    private <T> void createTable(MetaTable<T> meta) throws DbaException, SQLException {
+        String sql = "CREATE TABLE " + meta.getName() + "(";
+        sql += buildFieldPairs(meta);
+        sql += ")";
+        execute(sql);
     }
 
-    private <T> String getInsertSql(MetaTable<T> meta, Object object) {
+    private <T> String buildFieldPairs(MetaTable<T> meta) throws DbaException {
+        if (meta.fields().isEmpty()) {
+            throw new DbaException("No field.");
+        }
+        else {
+            String sql = "";
+            int i = 0;
+            while (i < meta.fields().size() - 1) {
+                var f = meta.fields().get(i);
+                sql += buildFieldPair(f) + ",";
+                ++i;
+            }
+            sql += buildFieldPair(meta.fields().get(i));
+            return sql;
+        }
+    }
+
+    private String buildFieldPair(MetaField f) {
+        return f.getName() + " " + DbaUtils.convertSqlType(f.getType());
+    }
+
+    private <T> String getInsertSql(MetaTable<T> meta,
+                                    Object object) throws SQLException,
+                                                          DbaException {
+        ensureTable(meta);
         return ""; // TODO getInsertSql
     }
 
-    private <T> String getRemoveSql(MetaTable<T> meta, ICondition condition) {
+    private <T> String getRemoveSql(MetaTable<T> meta,
+                                    ICondition<?> condition) throws SQLException,
+                                                                    DbaException {
+        ensureTable(meta);
         return ""; // TODO getRemoveSql
     }
 
-    private <T> String getSelectSql(MetaTable<T> meta, ICondition condition) {
+    private <T> String getSelectSql(MetaTable<T> meta,
+                                    ICondition<?> condition) throws SQLException,
+                                                                    DbaException {
+        ensureTable(meta);
         return ""; // TODO getSelectSql
     }
 
-    private <T> String getUpdateSql(MetaTable<T> meta, Object object, ICondition condition) {
+    private <T> String getUpdateSql(MetaTable<T> meta,
+                                    Object object,
+                                    ICondition<?> condition) throws SQLException,
+                                                                    DbaException {
+        ensureTable(meta);
         return ""; // TODO getUpdateSql
     }
 

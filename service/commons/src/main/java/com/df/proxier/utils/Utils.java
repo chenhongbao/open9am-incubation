@@ -38,7 +38,6 @@ public class Utils {
     }
 
     public synchronized static long getExecutionId() {
-        // TODO getSystemSerialNumber
         if (EXECUTION_ID.get() == 0L) {
             var n = nextUuid().getLeastSignificantBits() >> 32;
             EXECUTION_ID.set(n);

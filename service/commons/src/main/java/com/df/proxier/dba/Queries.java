@@ -26,60 +26,60 @@ import java.sql.Connection;
  */
 public class Queries {
 
-    public static ICondition<ICondition<?>> and(ICondition<?> c0, ICondition<?> c1) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<ICondition<?>> and(ICondition<?> c0, ICondition<?> c1) throws DbaException {
+        return new Condition<>(c0, c1, ConditionType.AND);
     }
 
     public static IQuery createQuery(Connection dbConnection) {
         return new Query(dbConnection);
     }
 
-    public static ICondition<Long> equals(Field field, Long value) {
+    public static ICondition<Long> equals(Field field, Long value) throws DbaException {
         return new Condition<>(field, value, ConditionType.EQUALS);
     }
 
-    public static ICondition<Integer> equals(Field field, Integer value) {
+    public static ICondition<Integer> equals(Field field, Integer value) throws DbaException {
         return new Condition<>(field, value, ConditionType.EQUALS);
     }
 
-    public static ICondition<String> equals(Field field, String value) {
+    public static ICondition<String> equals(Field field, String value) throws DbaException {
         return new Condition<>(field, value, ConditionType.EQUALS);
     }
 
-    public static ICondition<String> like(Field field, String pattern) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<String> like(Field field, String pattern) throws DbaException {
+        return new Condition<>(field, pattern, ConditionType.LIKE);
     }
 
-    public static ICondition<ICondition<?>> not(ICondition<?> condition) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<ICondition<?>> not(ICondition<?> condition) throws DbaException {
+        return new Condition<>(condition, ConditionType.NOT);
     }
 
-    public static ICondition<ICondition<?>> or(ICondition<?> c0, ICondition<?> c1) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<ICondition<?>> or(ICondition<?> c0, ICondition<?> c1) throws DbaException {
+        return new Condition<>(c0, c1, ConditionType.OR);
     }
 
-    public static ICondition<Long> lessThan(Field field, Long value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<Long> lessThan(Field field, Long value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LESS_THAN);
     }
 
-    public static ICondition<Integer> lessThan(Field field, Integer value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<Integer> lessThan(Field field, Integer value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LESS_THAN);
     }
 
-    public static ICondition<String> lessThan(Field field, String value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<String> lessThan(Field field, String value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LESS_THAN);
     }
 
-    public static ICondition<Long> largerThan(Field field, Long value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<Long> largerThan(Field field, Long value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LARGER_THAN);
     }
 
-    public static ICondition<Integer> largerThan(Field field, Integer value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<Integer> largerThan(Field field, Integer value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LARGER_THAN);
     }
 
-    public static ICondition<String> largerThan(Field field, String value) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static ICondition<String> largerThan(Field field, String value) throws DbaException {
+        return new Condition<>(field, value, ConditionType.LARGER_THAN);
     }
 
     private Queries() {

@@ -24,6 +24,9 @@ class Condition<T> implements ICondition<T> {
         if (type != ConditionType.NOT) {
             throw new IllegalArgumentException("Expect NOT but found " + type + ".");
         }
+        if (!(value instanceof ICondition)) {
+            throw new IllegalArgumentException("NOT needs ICondition as parameter.");
+        }
         meta = null;
         v0 = value;
         t = type;
@@ -37,11 +40,11 @@ class Condition<T> implements ICondition<T> {
         sqlv = stringValue(v0);
     }
 
-    Condition(Field field, T c0, T c1, ConditionType type) throws DbaException {
+    Condition(T c0, T c1, ConditionType type) throws DbaException {
         if (type != ConditionType.AND && type != ConditionType.OR) {
             throw new IllegalArgumentException("Expect AND/OR but found " + type + ".");
         }
-        this.meta = DbaUtils.inspectField(field);
+        this.meta = null;
         v0 = c0;
         v1 = c1;
         t = type;
