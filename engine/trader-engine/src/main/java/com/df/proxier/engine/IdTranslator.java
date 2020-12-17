@@ -17,9 +17,9 @@
 package com.df.proxier.engine;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -33,15 +33,15 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class IdTranslator {
 
-    private final ConcurrentHashMap<Long, Long> destDownCounts;
-    private final ConcurrentHashMap<Long, Long> dests;
+    private final HashMap<Long, Long> destDownCounts;
+    private final HashMap<Long, Long> dests;
     private final AtomicLong id = new AtomicLong(0);
-    private final ConcurrentHashMap<Long, Set<Long>> srcs;
+    private final HashMap<Long, Set<Long>> srcs;
 
     public IdTranslator() {
-        dests = new ConcurrentHashMap<>(1024);
-        destDownCounts = new ConcurrentHashMap<>(1024);
-        srcs = new ConcurrentHashMap<>(1024);
+        dests = new HashMap<>(1024);
+        destDownCounts = new HashMap<>(1024);
+        srcs = new HashMap<>(1024);
     }
 
     public void clear() {

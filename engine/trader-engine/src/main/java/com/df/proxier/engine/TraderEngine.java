@@ -45,24 +45,23 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class TraderEngine implements ITraderEngine {
 
     private ITraderEngineAlgorithm algo;
     private IDataSource ds;
     private final Properties globalStartProps;
-    private final ConcurrentHashMap<ITraderEngineHandler, Object> handlers;
-    private final ConcurrentHashMap<String, Instrument> instruments;
-    private final ConcurrentHashMap<Long, Integer> orderTraders;
+    private final HashMap<ITraderEngineHandler, Object> handlers;
+    private final HashMap<String, Instrument> instruments;
+    private final HashMap<Long, Integer> orderTraders;
     private EngineStatus status;
-    private final ConcurrentHashMap<Integer, ExtendedTraderServiceRuntime> traders;
+    private final HashMap<Integer, ExtendedTraderServiceRuntime> traders;
 
     public TraderEngine() {
-        handlers = new ConcurrentHashMap<>(32);
-        traders = new ConcurrentHashMap<>(32);
-        orderTraders = new ConcurrentHashMap<>(1024);
-        instruments = new ConcurrentHashMap<>(512);
+        handlers = new HashMap<>(32);
+        traders = new HashMap<>(32);
+        orderTraders = new HashMap<>(1024);
+        instruments = new HashMap<>(512);
         globalStartProps = new Properties();
     }
 

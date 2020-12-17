@@ -24,7 +24,7 @@ import java.time.ZonedDateTime;
  * <p>
  * <b>Pre-like fields</b> are yesterday's settled data and remains unchanged for
  * today. <b>Today-like fields</b> are owning today's position that is open
- * today but not yet closed. <b>Open-like fields</b> are all today's opened
+ * today but not yet closed. <b>TodayOpen-like fields</b> are all today's opened
  * position including both closed and not yet closed.
  *
  * @author Hongbao Chen

@@ -94,7 +94,9 @@ public enum ExceptionCodes {
     DIRECTION_NULL(0x47, "Direction null."),
     OFFSET_NULL(0x48, "Offset null."),
     NO_CONTRACT(0x49, "No contract."),
-    INVALID_DELETING_COMMISSION_STATUS(0x4A, "Invalid deleting commission status.");
+    INVALID_DELETING_COMMISSION_STATUS(0x4A, "Invalid deleting commission status."),
+    PREPROCESS_TRADE_FAIL(0x4B, "Preprocess trade failed."),
+    PREPROCESS_RESPONSE_FAIL(0x4C, "Preprocess response failed.");
 
     private final int code;
     private final String message;

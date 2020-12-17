@@ -80,27 +80,9 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
              */
         }
         else {
-            try {
-                /*
-                 * Call cancel handler to cancel a bad request.
-                 */
-                var delete = initResponse(request);
-                delete.setAction(ActionType.DELETE);
-                delete.setStatusCode(exception.getCode());
-                delete.setStatusMessage(exception.getMessage());
-                onResponse(delete);
-                /*
-                 * Call user handler.
-                 */
-                callOnRequestException(request,
-                                       exception,
-                                       requestId);
-            }
-            catch (Throwable th) {
-                callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
-                                                           ExceptionCodes.USER_CODE_ERROR.message(),
-                                                           th));
-            }
+            deleteOrderWhenException(request,
+                                     exception,
+                                     requestId);
         }
     }
 
@@ -108,14 +90,20 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
     public void onResponse(Response response) {
         try {
             info.getEngine().getDataSource().getConnection().addResponse(response);
+            preprocess(response);
         }
         catch (DataSourceException ex) {
-            callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+            callOnException(new TraderRuntimeException(ExceptionCodes.DS_FAILURE_UNFIXABLE.code(),
                                                        "Fail saving response to data source.",
                                                        ex));
         }
+        catch (TraderException ex) {
+            callOnException(new TraderRuntimeException(ExceptionCodes.PREPROCESS_RESPONSE_FAIL.code(),
+                                                       ExceptionCodes.PREPROCESS_RESPONSE_FAIL.message(),
+                                                       ex));
+        }
         if (response.getAction() == ActionType.DELETE) {
-            deleteOrder(response);
+            dealDelete(response);
         }
         callOnResponse(response);
     }
@@ -140,91 +128,15 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
 
     @Override
     public void onTrade(Trade trade) {
-        IDataConnection conn = null;
         try {
             preprocess(trade);
-            /*
-             * Get data source and start transaction.
-             */
-            conn = getDataSource().getConnection();
-            conn.transaction();
-            /*
-             * Add trade. Please note that volumn in trade could be zero,
-             * notifying a status change of the inserted order request.
-             */
-            conn.addTrade(trade);
-            var offset = trade.getOffset();
-            if (offset == null) {
-                throw new TraderRuntimeException(ExceptionCodes.OFFSET_NULL.code(),
-                                                 ExceptionCodes.OFFSET_NULL.message());
-            }
-            if (Offset.OPEN == offset) {
-                /*
-                 * Deal opening order.
-                 */
-                var bs = getFrozenBundles(trade.getOrderId(), conn);
-                int count = 0;
-                var it = bs.iterator();
-                while (count < trade.getQuantity() && it.hasNext()) {
-                    var b = it.next();
-                    var s = b.getContract().getStatus();
-                    if (s != ContractStatus.OPENING) {
-                        continue;
-                    }
-                    dealOpen(b.getCommission(),
-                             b.getMargin(),
-                             b.getContract(),
-                             trade,
-                             conn
-                    );
-                    ++count;
-                }
-                if (count < trade.getQuantity()) {
-                    throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
-                                                     ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
-                }
-            }
-            else {
-                /*
-                 * Deal closing order.
-                 */
-                var bs = getFrozenBundles(trade.getOrderId(), conn);
-                int count = 0;
-                var it = bs.iterator();
-                while (count < trade.getQuantity() && it.hasNext()) {
-                    var b = it.next();
-                    var s = b.getContract().getStatus();
-                    if (s != ContractStatus.CLOSING) {
-                        continue;
-                    }
-                    dealClose(b.getCommission(),
-                              b.getMargin(),
-                              b.getContract(),
-                              trade,
-                              conn);
-                    ++count;
-                }
-                if (count < trade.getQuantity()) {
-                    throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
-                                                     ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
-                }
-            }
-            conn.commit();
         }
-        catch (TraderException e) {
-            if (conn != null) {
-                rollback(conn);
-            }
-            callOnException(new TraderRuntimeException(e.getCode(),
-                                                       e.getMessage(),
-                                                       e));
+        catch (TraderException ex) {
+            callOnException(new TraderRuntimeException(ExceptionCodes.PREPROCESS_TRADE_FAIL.code(),
+                                                       ExceptionCodes.PREPROCESS_TRADE_FAIL.message(),
+                                                       ex));
         }
-        catch (TraderRuntimeException e) {
-            if (conn != null) {
-                rollback(conn);
-            }
-            callOnException(e);
-        }
+        dealTrade(trade);
         callOnTrade(trade);
     }
 
@@ -312,28 +224,6 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         });
     }
 
-    private void cancelClose(Commission commission,
-                             Contract contract,
-                             IDataConnection conn) throws DataSourceException {
-        requireStatus(contract, ContractStatus.CLOSING);
-        contract.setStatus(ContractStatus.OPEN);
-        conn.updateContract(contract);
-        conn.removeCommission(commission.getCommissionId());
-    }
-
-    private void cancelOpen(Commission commission,
-                            Margin margin,
-                            Contract contract,
-                            IDataConnection conn) throws DataSourceException {
-        requireStatus(commission, FeeStatus.FORZEN);
-        requireStatus(margin, FeeStatus.FORZEN);
-        requireStatus(contract, ContractStatus.OPENING);
-        conn.removeContract(contract.getContractId());
-        conn.removeCommission(commission.getCommissionId());
-        conn.removeMargin(margin.getMarginId());
-
-    }
-
     private void checkCommissionsNull(Collection<Commission> cs) {
         if (cs == null) {
             throw new TraderRuntimeException(ExceptionCodes.COMMISSION_NULL.code(),
@@ -378,6 +268,42 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         }
     }
 
+    private void closeDelete(Response response, IDataConnection conn) throws DataSourceException {
+        var bs = getFrozenBundles(response.getOrderId(), conn);
+        for (var b : bs) {
+            var s = b.getContract().getStatus();
+            if (s != ContractStatus.CLOSING) {
+                continue;
+            }
+            deleteClose(b.getCommission(),
+                        b.getContract(),
+                        conn);
+        }
+    }
+
+    private void closeTrade(Trade trade, IDataConnection conn) throws DataSourceException, TraderException {
+        var bs = getFrozenBundles(trade.getOrderId(), conn);
+        int count = 0;
+        var it = bs.iterator();
+        while (count < trade.getQuantity() && it.hasNext()) {
+            var b = it.next();
+            var s = b.getContract().getStatus();
+            if (s != ContractStatus.CLOSING) {
+                continue;
+            }
+            dealClose(b.getCommission(),
+                      b.getMargin(),
+                      b.getContract(),
+                      trade,
+                      conn);
+            ++count;
+        }
+        if (count < trade.getQuantity()) {
+            throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
+                                             ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
+        }
+    }
+
     private void dealClose(Commission commission,
                            Margin margin,
                            Contract contract,
@@ -405,6 +331,52 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         contract.setCloseAmount(amount);
         contract.setStatus(ContractStatus.CLOSED);
         conn.updateContract(contract);
+    }
+
+    private void dealDelete(Response response) {
+        IDataConnection conn = null;
+        try {
+            /*
+             * Get data source and start transaction.
+             */
+            conn = getDataSource().getConnection();
+            conn.transaction();
+            /*
+             * Add cancel response.
+             */
+            conn.addResponse(response);
+            var o = conn.getRequestByOrderId(response.getOrderId());
+            if (o == null) {
+                throw new TraderRuntimeException(ExceptionCodes.ORDER_ID_NOT_FOUND.code(),
+                                                 ExceptionCodes.ORDER_ID_NOT_FOUND.message());
+            }
+            var offset = o.getOffset();
+            if (offset == null) {
+                throw new TraderRuntimeException(ExceptionCodes.OFFSET_NULL.code(),
+                                                 ExceptionCodes.OFFSET_NULL.message());
+            }
+            if (offset == Offset.OPEN) {
+                openDelete(response, conn);
+            }
+            else {
+                closeDelete(response, conn);
+            }
+            conn.commit();
+        }
+        catch (TraderException e) {
+            if (conn != null) {
+                rollback(conn);
+            }
+            callOnException(new TraderRuntimeException(e.getCode(),
+                                                       e.getMessage(),
+                                                       e));
+        }
+        catch (TraderRuntimeException e) {
+            if (conn != null) {
+                rollback(conn);
+            }
+            callOnException(e);
+        }
     }
 
     private void dealOpen(Commission commission,
@@ -439,59 +411,29 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         conn.updateCommission(commission);
     }
 
-    private void deleteOrder(Response response) {
+    private void dealTrade(Trade trade) {
         IDataConnection conn = null;
         try {
-            preprocess(response);
             /*
              * Get data source and start transaction.
              */
             conn = getDataSource().getConnection();
             conn.transaction();
             /*
-             * Add cancel response.
+             * Add trade. Please note that volumn in trade could be zero,
+             * notifying a status change of the inserted order request.
              */
-            conn.addResponse(response);
-            var o = conn.getRequestByOrderId(response.getOrderId());
-            if (o == null) {
-                throw new TraderRuntimeException(ExceptionCodes.ORDER_ID_NOT_FOUND.code(),
-                                                 ExceptionCodes.ORDER_ID_NOT_FOUND.message());
-            }
-            var offset = o.getOffset();
+            conn.addTrade(trade);
+            var offset = trade.getOffset();
             if (offset == null) {
                 throw new TraderRuntimeException(ExceptionCodes.OFFSET_NULL.code(),
                                                  ExceptionCodes.OFFSET_NULL.message());
             }
-            if (offset == Offset.OPEN) {
-                /*
-                 * Cancel opening order.
-                 */
-                var bs = getFrozenBundles(response.getOrderId(), conn);
-                for (var b : bs) {
-                    var s = b.getContract().getStatus();
-                    if (s != ContractStatus.OPENING) {
-                        continue;
-                    }
-                    cancelOpen(b.getCommission(),
-                               b.getMargin(),
-                               b.getContract(),
-                               conn);
-                }
+            if (Offset.OPEN == offset) {
+                openTrade(trade, conn);
             }
             else {
-                /*
-                 * Cancel closing order.
-                 */
-                var bs = getFrozenBundles(response.getOrderId(), conn);
-                for (var b : bs) {
-                    var s = b.getContract().getStatus();
-                    if (s != ContractStatus.CLOSING) {
-                        continue;
-                    }
-                    cancelClose(b.getCommission(),
-                                b.getContract(),
-                                conn);
-                }
+                closeTrade(trade, conn);
             }
             conn.commit();
         }
@@ -508,6 +450,54 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
                 rollback(conn);
             }
             callOnException(e);
+        }
+    }
+
+    private void deleteClose(Commission commission,
+                             Contract contract,
+                             IDataConnection conn) throws DataSourceException {
+        requireStatus(contract, ContractStatus.CLOSING);
+        contract.setStatus(ContractStatus.OPEN);
+        conn.updateContract(contract);
+        conn.removeCommission(commission.getCommissionId());
+    }
+
+    private void deleteOpen(Commission commission,
+                            Margin margin,
+                            Contract contract,
+                            IDataConnection conn) throws DataSourceException {
+        requireStatus(commission, FeeStatus.FORZEN);
+        requireStatus(margin, FeeStatus.FORZEN);
+        requireStatus(contract, ContractStatus.OPENING);
+        conn.removeContract(contract.getContractId());
+        conn.removeCommission(commission.getCommissionId());
+        conn.removeMargin(margin.getMarginId());
+
+    }
+
+    private void deleteOrderWhenException(Request request,
+                                          TraderRuntimeException exception,
+                                          int requestId) {
+        try {
+            /*
+             * Call cancel handler to cancel a bad request.
+             */
+            var delete = initResponse(request);
+            delete.setAction(ActionType.DELETE);
+            delete.setStatusCode(exception.getCode());
+            delete.setStatusMessage(exception.getMessage());
+            onResponse(delete);
+            /*
+             * Call user handler.
+             */
+            callOnRequestException(request,
+                                   exception,
+                                   requestId);
+        }
+        catch (Throwable th) {
+            callOnException(new TraderRuntimeException(ExceptionCodes.USER_CODE_ERROR.code(),
+                                                       ExceptionCodes.USER_CODE_ERROR.message(),
+                                                       th));
         }
     }
 
@@ -578,6 +568,47 @@ public class TraderServiceHandler extends IdTranslator implements ITraderService
         r.setTradingDay(info.getTrader().getServiceInfo().getTradingDay());
         r.setUuid(Utils.nextUuid().toString());
         return r;
+    }
+
+    private void openDelete(Response response, IDataConnection conn) throws DataSourceException {
+        var bs = getFrozenBundles(response.getOrderId(), conn);
+        for (var b : bs) {
+            var s = b.getContract().getStatus();
+            if (s != ContractStatus.OPENING) {
+                continue;
+            }
+            deleteOpen(b.getCommission(),
+                       b.getMargin(),
+                       b.getContract(),
+                       conn);
+        }
+    }
+
+    private void openTrade(Trade trade, IDataConnection conn) throws TraderException {
+        /*
+         * Deal opening order.
+         */
+        var bs = getFrozenBundles(trade.getOrderId(), conn);
+        int count = 0;
+        var it = bs.iterator();
+        while (count < trade.getQuantity() && it.hasNext()) {
+            var b = it.next();
+            var s = b.getContract().getStatus();
+            if (s != ContractStatus.OPENING) {
+                continue;
+            }
+            dealOpen(b.getCommission(),
+                     b.getMargin(),
+                     b.getContract(),
+                     trade,
+                     conn
+            );
+            ++count;
+        }
+        if (count < trade.getQuantity()) {
+            throw new TraderRuntimeException(ExceptionCodes.INCONSISTENT_FROZEN_INFO.code(),
+                                             ExceptionCodes.INCONSISTENT_FROZEN_INFO.message());
+        }
     }
 
     private void preprocess(Trade trade) throws TraderException {
