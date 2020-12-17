@@ -26,20 +26,39 @@ import java.time.ZonedDateTime;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class OrderResponse {
+public class Trade {
+
+    private ActionType action;
+    private Direction direction;
 
     private String instrumentId;
+    private Offset offset;
     private Long orderId;
     private Double price;
-    private Long responseId;
+    private Long quantity;
     private ZonedDateTime timestamp;
+    private Long tradeId;
     private Integer traderId;
     private LocalDate tradingDay;
-    private OrderType type;
     private String uuid;
-    private Long volumn;
 
-    public OrderResponse() {
+    public Trade() {
+    }
+
+    public ActionType getAction() {
+        return action;
+    }
+
+    public void setAction(ActionType action) {
+        this.action = action;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public String getInstrumentId() {
@@ -48,6 +67,14 @@ public class OrderResponse {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
+    }
+
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
     }
 
     public Long getOrderId() {
@@ -66,12 +93,12 @@ public class OrderResponse {
         this.price = price;
     }
 
-    public Long getResponseId() {
-        return responseId;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setResponseId(Long responseId) {
-        this.responseId = responseId;
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
     }
 
     public ZonedDateTime getTimestamp() {
@@ -80,6 +107,14 @@ public class OrderResponse {
 
     public void setTimestamp(ZonedDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Long getTradeId() {
+        return tradeId;
+    }
+
+    public void setTradeId(Long tradeId) {
+        this.tradeId = tradeId;
     }
 
     public Integer getTraderId() {
@@ -98,28 +133,12 @@ public class OrderResponse {
         this.tradingDay = tradingDay;
     }
 
-    public OrderType getType() {
-        return type;
-    }
-
-    public void setType(OrderType type) {
-        this.type = type;
-    }
-
     public String getUuid() {
         return uuid;
     }
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public Long getVolumn() {
-        return volumn;
-    }
-
-    public void setVolumn(Long volumn) {
-        this.volumn = volumn;
     }
 
 }

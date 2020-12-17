@@ -24,9 +24,9 @@ public class Tick {
     private Double price;
     private Double settlementPrice;
     private ZonedDateTime timestamp;
-    private Long todayVolumn;
-    private LocalDate tradingDay;
     private Long volumn;
+    private LocalDate tradingDay;
+    private Long quantity;
 
     public Tick() {
     }
@@ -103,12 +103,12 @@ public class Tick {
         this.timestamp = timestamp;
     }
 
-    public Long getTodayVolumn() {
-        return todayVolumn;
+    public Long getVolumn() {
+        return volumn;
     }
 
-    public void setTodayVolumn(Long todayVolumn) {
-        this.todayVolumn = todayVolumn;
+    public void setVolumn(Long volumn) {
+        this.volumn = volumn;
     }
 
     public LocalDate getTradingDay() {
@@ -119,12 +119,12 @@ public class Tick {
         this.tradingDay = tradingDay;
     }
 
-    public Long getVolumn() {
-        return volumn;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setVolumn(Long volumn) {
-        this.volumn = volumn;
+    public void setQuantity(Long volumn) {
+        this.quantity = volumn;
     }
 
 }

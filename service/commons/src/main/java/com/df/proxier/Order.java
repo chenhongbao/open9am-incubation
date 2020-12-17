@@ -28,10 +28,12 @@ import java.time.ZonedDateTime;
 public class Order {
 
     private Double amount;
-    private ZonedDateTime cancelTimestamp;
+    private ZonedDateTime deleteTimestamp;
+    private Direction direction;
     private ZonedDateTime insertTimestamp;
     private String instrumentId;
-    private Boolean isCanceled;
+    private Boolean deleted;
+    private Offset offset;
     private Long orderId;
     private Double price;
     private OrderStatus status;
@@ -40,9 +42,8 @@ public class Order {
     private Long tradedVolumn;
     private Integer traderId;
     private LocalDate tradingDay;
-    private OrderType type;
     private ZonedDateTime updateTimestamp;
-    private Long volumn;
+    private Long quantity;
 
     public Order() {
     }
@@ -55,12 +56,20 @@ public class Order {
         this.amount = amount;
     }
 
-    public ZonedDateTime getCancelTimestamp() {
-        return cancelTimestamp;
+    public ZonedDateTime getDeleteTimestamp() {
+        return deleteTimestamp;
     }
 
-    public void setCancelTimestamp(ZonedDateTime cancelTimestamp) {
-        this.cancelTimestamp = cancelTimestamp;
+    public void setDeleteTimestamp(ZonedDateTime cancelTimestamp) {
+        this.deleteTimestamp = cancelTimestamp;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public ZonedDateTime getInsertTimestamp() {
@@ -79,9 +88,17 @@ public class Order {
         this.instrumentId = instrumentId;
     }
 
-    public void setIsCanceled(Boolean isCanceled) {
-        this.isCanceled = isCanceled;
+    public void setDeleted(Boolean isCanceled) {
+        this.deleted = isCanceled;
 
+    }
+
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
     }
 
     public Long getOrderId() {
@@ -148,14 +165,6 @@ public class Order {
         this.tradingDay = tradingDay;
     }
 
-    public OrderType getType() {
-        return type;
-    }
-
-    public void setType(OrderType type) {
-        this.type = type;
-    }
-
     public ZonedDateTime getUpdateTimestamp() {
         return updateTimestamp;
     }
@@ -164,16 +173,16 @@ public class Order {
         this.updateTimestamp = updateTimestamp;
     }
 
-    public Long getVolumn() {
-        return volumn;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setVolumn(Long volumn) {
-        this.volumn = volumn;
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
     }
 
-    public Boolean isIsCanceled() {
-        return isCanceled;
+    public Boolean isDeleted() {
+        return deleted;
     }
 
 }

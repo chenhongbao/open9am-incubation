@@ -28,13 +28,14 @@ import java.time.ZonedDateTime;
 public class Contract {
 
     private Double closeAmount;
+    private LocalDate closeTradingDay;
     private Long contractId;
+    private Direction direction;
     private String instrumentId;
     private Double openAmount;
     private ZonedDateTime openTimestamp;
     private LocalDate openTradingDay;
-    private OrderType openType;
-    private Long responseId;
+    private Long tradeId;
     private ContractStatus status;
     private ZonedDateTime timestamp;
     private Integer traderId;
@@ -50,12 +51,28 @@ public class Contract {
         this.closeAmount = closeAmount;
     }
 
+    public LocalDate getCloseTradingDay() {
+        return closeTradingDay;
+    }
+
+    public void setCloseTradingDay(LocalDate closeTradingDay) {
+        this.closeTradingDay = closeTradingDay;
+    }
+
     public Long getContractId() {
         return contractId;
     }
 
     public void setContractId(Long contractId) {
         this.contractId = contractId;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public String getInstrumentId() {
@@ -90,20 +107,12 @@ public class Contract {
         this.openTradingDay = tradingDay;
     }
 
-    public OrderType getOpenType() {
-        return openType;
+    public Long getTradeId() {
+        return tradeId;
     }
 
-    public void setOpenType(OrderType openType) {
-        this.openType = openType;
-    }
-
-    public Long getResponseId() {
-        return responseId;
-    }
-
-    public void setResponseId(Long responseId) {
-        this.responseId = responseId;
+    public void setTradeId(Long tradeId) {
+        this.tradeId = tradeId;
     }
 
     public ContractStatus getStatus() {

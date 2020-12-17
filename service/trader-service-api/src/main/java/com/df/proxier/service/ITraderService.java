@@ -1,7 +1,6 @@
 package com.df.proxier.service;
 
-import com.df.proxier.CancelRequest;
-import com.df.proxier.OrderRequest;
+import com.df.proxier.Request;
 import java.util.Properties;
 
 /**
@@ -16,9 +15,7 @@ public interface ITraderService {
 
     void stop() throws TraderException;
 
-    void insert(OrderRequest request, long requestId) throws TraderException;
-
-    void cancel(CancelRequest request, long requestId) throws TraderException;
+    void insert(Request request, long requestId) throws TraderException;
 
     int getStatus();
 

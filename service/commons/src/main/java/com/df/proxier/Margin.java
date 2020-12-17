@@ -34,7 +34,6 @@ public class Margin {
     private FeeStatus status;
     private ZonedDateTime timestamp;
     private LocalDate tradingDay;
-    private OrderType type;
 
     public Margin() {
     }
@@ -95,11 +94,4 @@ public class Margin {
         this.tradingDay = tradingDay;
     }
 
-    public OrderType getType() {
-        return type;
-    }
-
-    public void setType(OrderType type) {
-        this.type = type;
-    }
 }

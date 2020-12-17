@@ -17,8 +17,7 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelRequest;
-import com.df.proxier.CancelResponse;
+import com.df.proxier.Response;
 import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
@@ -26,8 +25,8 @@ import com.df.proxier.Deposit;
 import com.df.proxier.FeeStatus;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
-import com.df.proxier.OrderRequest;
-import com.df.proxier.OrderResponse;
+import com.df.proxier.Request;
+import com.df.proxier.Trade;
 import com.df.proxier.Tick;
 import com.df.proxier.Withdraw;
 import java.sql.Connection;
@@ -56,12 +55,7 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public void addCancelRequest(CancelRequest request) throws DataSourceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void addCancelResponse(CancelResponse response) throws DataSourceException {
+    public void addResponse(Response response) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -91,12 +85,12 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public void addOrderRequest(OrderRequest request) throws DataSourceException {
+    public void addRequest(Request request) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void addOrderResponse(OrderResponse response) throws DataSourceException {
+    public void addTrade(Trade response) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -131,22 +125,17 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public CancelRequest getCancelRequestByOrderId(long orderId) throws DataSourceException {
+    public Response getResponseById(long responseId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<CancelRequest> getCancelRequests() throws DataSourceException {
+    public Collection<Response> getResponseByOrderId(long orderId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<CancelResponse> getCancelResponseByOrderId(long orderId) throws DataSourceException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Collection<CancelResponse> getCancelResponses() throws DataSourceException {
+    public Collection<Response> getResponses() throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -186,7 +175,7 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public Collection<Contract> getContractsByResponseId(long responseId) throws DataSourceException {
+    public Collection<Contract> getContractsByTradeId(long responseId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -231,22 +220,27 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public OrderRequest getOrderRequestById(long orderId) throws DataSourceException {
+    public Request getRequestByOrderId(long orderId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<OrderRequest> getOrderRequests() throws DataSourceException {
+    public Collection<Request> getRequests() throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<OrderResponse> getOrderResponses() throws DataSourceException {
+    public Trade getTradeById(Long tradeId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public Collection<OrderResponse> getOrderResponsesByOrderId(long orderId) throws DataSourceException {
+    public Collection<Trade> getTrades() throws DataSourceException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Collection<Trade> getTradesByOrderId(long orderId) throws DataSourceException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

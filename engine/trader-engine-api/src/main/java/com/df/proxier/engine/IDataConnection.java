@@ -17,8 +17,6 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelRequest;
-import com.df.proxier.CancelResponse;
 import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
@@ -26,9 +24,10 @@ import com.df.proxier.Deposit;
 import com.df.proxier.FeeStatus;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
-import com.df.proxier.OrderRequest;
-import com.df.proxier.OrderResponse;
+import com.df.proxier.Request;
+import com.df.proxier.Response;
 import com.df.proxier.Tick;
+import com.df.proxier.Trade;
 import com.df.proxier.Withdraw;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -73,7 +72,7 @@ public interface IDataConnection {
 
     Contract getContractById(Long contractId) throws DataSourceException;
 
-    Collection<Contract> getContractsByResponseId(long responseId) throws DataSourceException;
+    Collection<Contract> getContractsByTradeId(long tradeId) throws DataSourceException;
 
     Collection<Contract> getContractsByInstrumentId(String instrumentId) throws DataSourceException;
 
@@ -107,29 +106,27 @@ public interface IDataConnection {
 
     void updateInstrument(Instrument instrument) throws DataSourceException;
 
-    Collection<OrderRequest> getOrderRequests() throws DataSourceException;
+    Collection<Request> getRequests() throws DataSourceException;
 
-    OrderRequest getOrderRequestById(long orderId) throws DataSourceException;
+    Request getRequestByOrderId(long orderId) throws DataSourceException;
 
-    void addOrderRequest(OrderRequest request) throws DataSourceException;
+    void addRequest(Request request) throws DataSourceException;
 
-    Collection<CancelRequest> getCancelRequests() throws DataSourceException;
+    Collection<Trade> getTrades() throws DataSourceException;
 
-    CancelRequest getCancelRequestByOrderId(long orderId) throws DataSourceException;
+    Collection<Trade> getTradesByOrderId(long orderId) throws DataSourceException;
 
-    void addCancelRequest(CancelRequest request) throws DataSourceException;
+    Trade getTradeById(Long tradeId) throws DataSourceException;
 
-    Collection<OrderResponse> getOrderResponses() throws DataSourceException;
+    void addTrade(Trade trade) throws DataSourceException;
 
-    Collection<OrderResponse> getOrderResponsesByOrderId(long orderId) throws DataSourceException;
+    Collection<Response> getResponses() throws DataSourceException;
 
-    void addOrderResponse(OrderResponse response) throws DataSourceException;
+    Collection<Response> getResponseByOrderId(long orderId) throws DataSourceException;
 
-    Collection<CancelResponse> getCancelResponses() throws DataSourceException;
+    Response getResponseById(long responseId) throws DataSourceException;
 
-    Collection<CancelResponse> getCancelResponseByOrderId(long orderId) throws DataSourceException;
-
-    void addCancelResponse(CancelResponse response) throws DataSourceException;
+    void addResponse(Response response) throws DataSourceException;
 
     Tick getTickByInstrumentId(String instrumentId) throws DataSourceException;
 

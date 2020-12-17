@@ -22,17 +22,35 @@ package com.df.proxier;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class OrderRequest {
+public class Request {
 
+    private ActionType action;
+    private Direction direction;
     private String instrumentId;
+    private Offset offset;
     private Long orderId;
     private Double price;
     private Integer traderId;
-    private OrderType type;
     private String uuid;
-    private Long volumn;
+    private Long quantity;
 
-    public OrderRequest() {
+    public Request() {
+    }
+
+    public ActionType getAction() {
+        return action;
+    }
+
+    public void setAction(ActionType action) {
+        this.action = action;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public String getInstrumentId() {
@@ -41,6 +59,14 @@ public class OrderRequest {
 
     public void setInstrumentId(String instrumentId) {
         this.instrumentId = instrumentId;
+    }
+
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
     }
 
     public Long getOrderId() {
@@ -67,14 +93,6 @@ public class OrderRequest {
         this.traderId = traderId;
     }
 
-    public OrderType getType() {
-        return type;
-    }
-
-    public void setType(OrderType type) {
-        this.type = type;
-    }
-
     public String getUuid() {
         return uuid;
     }
@@ -83,12 +101,12 @@ public class OrderRequest {
         this.uuid = uuid;
     }
 
-    public Long getVolumn() {
-        return volumn;
+    public Long getQuantity() {
+        return quantity;
     }
 
-    public void setVolumn(Long volumn) {
-        this.volumn = volumn;
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
     }
 
 }

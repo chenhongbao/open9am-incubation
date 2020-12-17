@@ -24,10 +24,11 @@ package com.df.proxier;
  */
 public enum OrderStatus {
     ALL_TRADED(0x60),
-    PART_TRADED_INQUE(0x61),
-    PART_TRADED_NOQUE(0x62),
+    QUEUED(0x61),
+    UNQUEUED(0x62),
     ACCEPTED(0x63),
-    CANCELED(0x64);
+    DELETED(0x64),
+    REJECTED(0x65);
 
     private final int c;
 

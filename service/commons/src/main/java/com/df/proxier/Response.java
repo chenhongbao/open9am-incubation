@@ -25,10 +25,15 @@ import java.time.ZonedDateTime;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class CancelResponse {
+public class Response {
 
+    private ActionType action;
+    private Direction direction;
     private String instrumentId;
+    private Offset offset;
     private Long orderId;
+    private Long responseId;
+    private OrderStatus status;
     private Integer statusCode;
     private String statusMessage;
     private ZonedDateTime timestamp;
@@ -36,7 +41,23 @@ public class CancelResponse {
     private LocalDate tradingDay;
     private String uuid;
 
-    public CancelResponse() {
+    public Response() {
+    }
+
+    public ActionType getAction() {
+        return action;
+    }
+
+    public void setAction(ActionType action) {
+        this.action = action;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public String getInstrumentId() {
@@ -47,12 +68,36 @@ public class CancelResponse {
         this.instrumentId = instrumentId;
     }
 
+    public Offset getOffset() {
+        return offset;
+    }
+
+    public void setOffset(Offset offset) {
+        this.offset = offset;
+    }
+
     public Long getOrderId() {
         return orderId;
     }
 
     public void setOrderId(Long orderId) {
         this.orderId = orderId;
+    }
+
+    public Long getResponseId() {
+        return responseId;
+    }
+
+    public void setResponseId(Long responseId) {
+        this.responseId = responseId;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
     }
 
     public Integer getStatusCode() {

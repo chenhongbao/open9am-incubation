@@ -17,19 +17,20 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelRequest;
-import com.df.proxier.CancelResponse;
+import com.df.proxier.ActionType;
 import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
+import com.df.proxier.Direction;
 import com.df.proxier.FeeStatus;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
-import com.df.proxier.OrderRequest;
-import com.df.proxier.OrderResponse;
+import com.df.proxier.Offset;
 import com.df.proxier.OrderStatus;
-import com.df.proxier.OrderType;
+import com.df.proxier.Request;
+import com.df.proxier.Response;
 import com.df.proxier.Tick;
+import com.df.proxier.Trade;
 import com.df.proxier.service.ITraderService;
 import com.df.proxier.service.TraderException;
 import com.df.proxier.service.TraderRuntimeException;
@@ -204,7 +205,7 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
-    public void request(OrderRequest request,
+    public void request(Request request,
                         Instrument instrument,
                         Properties properties,
                         int requestId) throws TraderException {
@@ -214,8 +215,7 @@ public class TraderEngine implements ITraderEngine {
          * Remmeber the instrument it once operated.
          */
         instruments.put(instrument.getInstrumentId(), instrument);
-        var type = request.getType();
-        if (type == OrderType.BUY_OPEN || type == OrderType.SELL_OPEN) {
+        if (request.getOffset() == Offset.OPEN) {
             decideTrader(request);
             checkAssetsOpen(request, instrument);
             forwardRequest(request, request.getTraderId(), requestId);
@@ -229,10 +229,10 @@ public class TraderEngine implements ITraderEngine {
     }
 
     @Override
-    public void request(CancelRequest request, int requestId) throws TraderException {
+    public void request(Request request, int requestId) throws TraderException {
         if (request == null) {
-            throw new TraderException(ExceptionCodes.CANCEL_REQS_NULL.code(),
-                                      ExceptionCodes.CANCEL_REQS_NULL.message());
+            throw new TraderException(ExceptionCodes.DELETE_REQS_NULL.code(),
+                                      ExceptionCodes.DELETE_REQS_NULL.message());
         }
         forwardRequest(request, request.getTraderId(), requestId);
     }
@@ -404,31 +404,29 @@ public class TraderEngine implements ITraderEngine {
         });
     }
 
-    private boolean canClose(Contract c, OrderRequest request) throws TraderException {
+    private boolean canClose(Contract c, Request request) throws TraderException {
         if (c.getStatus() != ContractStatus.OPEN) {
             return false;
         }
-        var t = request.getType();
-        if (null == t) {
-            throw new TraderException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
-                                      ExceptionCodes.INVALID_ORDER_TYPE.message());
+        var offset = request.getOffset();
+        var direction = request.getDirection();
+        if (null == offset) {
+            throw new TraderException(ExceptionCodes.OFFSET_NULL.code(),
+                                      ExceptionCodes.OFFSET_NULL.message());
+        }
+        if (null == direction) {
+            throw new TraderException(ExceptionCodes.DIRECTION_NULL.code(),
+                                      ExceptionCodes.DIRECTION_NULL.message());
+        }
+        if (direction == Direction.BUY) {
+            return c.getDirection() == Direction.SELL;
         }
         else {
-            switch (t) {
-                case BUY_CLOSE:
-                case BUY_CLOSE_TODAY:
-                    return c.getOpenType() == OrderType.SELL_OPEN;
-                case SELL_CLOSE:
-                case SELL_CLOSE_TODAY:
-                    return c.getOpenType() == OrderType.BUY_OPEN;
-                default:
-                    throw new TraderException(ExceptionCodes.INVALID_ORDER_TYPE.code(),
-                                              ExceptionCodes.INVALID_ORDER_TYPE.message());
-            }
+            return c.getDirection() == Direction.BUY;
         }
     }
 
-    private void cancelOrderRequest(OrderRequest request) throws TraderException {
+    private void deleteOrderRequest(Request request) throws TraderException {
         var orderId = request.getOrderId();
         var traderId = findTraderIdByOrderId(orderId);
         var rt = findTraderServiceRuntimeByTraderId(traderId);
@@ -437,20 +435,23 @@ public class TraderEngine implements ITraderEngine {
             throw new TraderException(ExceptionCodes.TRADER_SVC_HANDLER_NULL.code(),
                                       ExceptionCodes.TRADER_SVC_HANDLER_NULL.message());
         }
-        var r = new CancelResponse();
+        var r = new Response();
         r.setInstrumentId(request.getInstrumentId());
         r.setOrderId(orderId);
         r.setTraderId(traderId);
+        r.setAction(ActionType.DELETE);
+        r.setOffset(request.getOffset());
+        r.setDirection(request.getDirection());
         r.setTradingDay(rt.getTrader().getServiceInfo().getTradingDay());
         r.setUuid(Utils.nextUuid().toString());
         r.setStatusCode(0);
 
         try {
-            h.onCancelResponse(r);
+            h.onResponse(r);
         }
         catch (Throwable th) {
-            callOnException(new TraderRuntimeException(ExceptionCodes.CANCEL_ORDER_FAILED.code(),
-                                                       ExceptionCodes.CANCEL_ORDER_FAILED.message(),
+            callOnException(new TraderRuntimeException(ExceptionCodes.DELETE_ORDER_FAILED.code(),
+                                                       ExceptionCodes.DELETE_ORDER_FAILED.message(),
                                                        th));
         }
     }
@@ -484,7 +485,7 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private void check2(OrderRequest request, Instrument instrument) throws TraderException {
+    private void check2(Request request, Instrument instrument) throws TraderException {
         if (request == null) {
             throw new TraderException(ExceptionCodes.ORDER_REQS_NULL.code(),
                                       ExceptionCodes.ORDER_REQS_NULL.message());
@@ -495,40 +496,42 @@ public class TraderEngine implements ITraderEngine {
         }
     }
 
-    private Collection<Contract> checkAssetsClose(OrderRequest request, Instrument instrument) throws TraderException {
-        checkVolumn(request.getVolumn());
+    private Collection<Contract> checkAssetsClose(Request request, Instrument instrument) throws TraderException {
+        checkVolumn(request.getQuantity());
         var cs = getAvailableContracts(request);
-        if (cs.size() < request.getVolumn()) {
+        if (cs.size() < request.getQuantity()) {
             throw new TraderException(ExceptionCodes.INSUFFICIENT_POSITION.code(),
                                       ExceptionCodes.INSUFFICIENT_POSITION.message());
         }
         var r = new HashSet<Contract>(32);
         var c = algo.getCommission(request.getPrice(),
                                instrument,
-                               request.getType());
-        for (int i = 0; i < request.getVolumn(); ++i) {
+                               request.getDirection(),
+                               request.getOffset());
+        for (int i = 0; i < request.getQuantity(); ++i) {
             var ctr = cs.get(i);
             r.add(ctr);
-            setFrozenClose(c, ctr, request.getType());
+            setFrozenClose(c, ctr);
         }
         return r;
     }
 
-    private void checkAssetsOpen(OrderRequest request, Instrument instrument)
+    private void checkAssetsOpen(Request request, Instrument instrument)
             throws TraderEngineAlgorithmException, DataSourceException, TraderException {
-        checkVolumn(request.getVolumn());
+        checkVolumn(request.getQuantity());
         var a = algo.getAmount(request.getPrice(), instrument);
         var m = algo.getMargin(request.getPrice(), instrument);
         var c = algo.getCommission(request.getPrice(),
                                instrument,
-                               request.getType());
-        var total = request.getVolumn() * (m + c);
+                               request.getDirection(),
+                               request.getOffset());
+        var total = request.getQuantity() * (m + c);
         var available = getAvailableMoney();
         if (available < total) {
             throw new TraderException(ExceptionCodes.INSUFFICIENT_MONEY.code(),
                                       ExceptionCodes.INSUFFICIENT_MONEY.message());
         }
-        for (int i = 0; i < request.getVolumn(); ++i) {
+        for (int i = 0; i < request.getQuantity(); ++i) {
             setFrozenOpen(a, m, c, request);
         }
     }
@@ -552,7 +555,7 @@ public class TraderEngine implements ITraderEngine {
         });
     }
 
-    private void decideTrader(OrderRequest request) throws TraderException {
+    private void decideTrader(Request request) throws TraderException {
         var rt = getProperTrader(request);
         if (!Objects.equals(rt.getTraderId(), request.getTraderId())) {
             request.setTraderId(rt.getTraderId());
@@ -596,7 +599,7 @@ public class TraderEngine implements ITraderEngine {
         return traderId;
     }
 
-    private ExtendedTraderServiceRuntime findTraderRandomly(OrderRequest request) throws TraderException {
+    private ExtendedTraderServiceRuntime findTraderRandomly(Request request) throws TraderException {
         var a = new ArrayList<>(traders.keySet());
         traders.forEach((k, v) -> {
             if (v.isEnabled()) {
@@ -618,17 +621,17 @@ public class TraderEngine implements ITraderEngine {
         return rt;
     }
 
-    private void forward(OrderRequest request,
-                         ExtendedTraderServiceRuntime tr,
-                         int requestId) throws TraderException {
-        var destId = tr.getIdTranslator().getDestinatedId(request.getOrderId(), request.getVolumn());
+    private void newRequest(Request request,
+                            ExtendedTraderServiceRuntime tr,
+                            int requestId) throws TraderException {
+        var destId = tr.getIdTranslator().getDestinatedId(request.getOrderId(), request.getQuantity());
         request.setOrderId(destId);
         tr.getTrader().insert(request, requestId);
     }
 
-    private void forward(CancelRequest request,
-                         ExtendedTraderServiceRuntime tr,
-                         int requestId) throws TraderException {
+    private void deleteRequest(Request request,
+                               ExtendedTraderServiceRuntime tr,
+                               int requestId) throws TraderException {
         var ids = tr.getIdTranslator().getDestinatedIds(request.getOrderId());
         if (ids == null) {
             throw new TraderException(ExceptionCodes.DEST_ID_NOT_FOUND.code(),
@@ -650,26 +653,26 @@ public class TraderEngine implements ITraderEngine {
             }
             var c = Utils.copy(request);
             c.setOrderId(i);
-            tr.getTrader().cancel(c, requestId);
+            tr.getTrader().insert(c, requestId);
         }
     }
 
-    private <T> void forwardRequest(T request, Integer traderId, int requestId) throws TraderException {
+    private void forwardRequest(Request request, Integer traderId, int requestId) throws TraderException {
         var tr = findTraderServiceRuntimeByTraderId(traderId);
         check1(traderId, tr);
-        if (request instanceof OrderRequest) {
-            forward((OrderRequest) request, tr, requestId);
+        if (null == request.getAction()) {
+            throw new TraderException(ExceptionCodes.ACTION_NULL.code(),
+                                      ExceptionCodes.ACTION_NULL.message());
         }
-        else if (request instanceof CancelRequest) {
-            forward((CancelRequest) request, tr, requestId);
+        if (request.getAction() == ActionType.NEW) {
+            newRequest(request, tr, requestId);
         }
         else {
-            throw new TraderException(ExceptionCodes.INVALID_REQUEST_INSTANCE.code(),
-                                      ExceptionCodes.INVALID_REQUEST_INSTANCE.message());
+            deleteRequest(request, tr, requestId);
         }
     }
 
-    private List<Contract> getAvailableContracts(OrderRequest request) throws TraderException {
+    private List<Contract> getAvailableContracts(Request request) throws TraderException {
         var conn = ds.getConnection();
         var cs = conn.getContractsByInstrumentId(request.getInstrumentId());
         if (cs == null) {
@@ -695,22 +698,22 @@ public class TraderEngine implements ITraderEngine {
         return (a.getBalance() - a.getMargin() - a.getFrozenMargin() - a.getFrozenCommission());
     }
 
-    private Collection<Contract> getContractsByOrderResponses(Collection<OrderResponse> rsps) throws TraderException {
+    private Collection<Contract> getContractsByOrderResponses(Collection<Trade> rsps) throws TraderException {
         var cs = new HashSet<Contract>(128);
         var conn = ds.getConnection();
         for (var r : rsps) {
-            var s = conn.getContractsByResponseId(r.getResponseId());
+            var s = conn.getContractsByTradeId(r.getTradeId());
             if (s == null) {
-                throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
-                                          ExceptionCodes.CONTRACT_NULL.message()
-                                          + "(Response ID:" + r.getResponseId() + ")");
+                throw new TraderException(ExceptionCodes.NO_CONTRACT.code(),
+                                          ExceptionCodes.NO_CONTRACT.message()
+                                          + "(Trade ID:" + r.getTradeId() + ")");
             }
             cs.addAll(s);
         }
         return cs;
     }
 
-    private TraderServiceRuntime getProperTrader(OrderRequest request) throws TraderException {
+    private TraderServiceRuntime getProperTrader(Request request) throws TraderException {
         var traderId = request.getTraderId();
         if (traderId == null) {
             return findTraderRandomly(request);
@@ -746,9 +749,9 @@ public class TraderEngine implements ITraderEngine {
                                                  tradingDay));
     }
 
-    private Collection<OrderRequest> group(Collection<Contract> cs, OrderRequest request) throws DataSourceException {
-        final var today = new HashMap<Integer, OrderRequest>(64);
-        final var yd = new HashMap<Integer, OrderRequest>(64);
+    private Collection<Request> group(Collection<Contract> cs, Request request) throws DataSourceException {
+        final var today = new HashMap<Integer, Request>(64);
+        final var yd = new HashMap<Integer, Request>(64);
         final var conn = ds.getConnection();
         var tradingDay = conn.getTradingDay();
         for (var c : cs) {
@@ -760,18 +763,13 @@ public class TraderEngine implements ITraderEngine {
                                                ExceptionCodes.OBJECT_COPY_FAILED.code(),
                                                ExceptionCodes.OBJECT_COPY_FAILED.message());
                                    }
-                                   if (co.getType() == OrderType.BUY_CLOSE_TODAY) {
-                                       co.setType(OrderType.BUY_CLOSE);
-                                   }
-                                   else if (co.getType() == OrderType.SELL_CLOSE_TODAY) {
-                                       co.setType(OrderType.SELL_CLOSE);
-                                   }
-                                   co.setVolumn(0L);
+                                   co.setOffset(Offset.CLOSE);
+                                   co.setQuantity(0L);
                                    co.setTraderId(k);
                                    return co;
 
                                });
-                o.setVolumn(o.getVolumn() + 1);
+                o.setQuantity(o.getQuantity() + 1);
             }
             else {
                 var o = today.computeIfAbsent(c.getTraderId(), k -> {
@@ -781,22 +779,17 @@ public class TraderEngine implements ITraderEngine {
                                                   ExceptionCodes.OBJECT_COPY_FAILED.code(),
                                                   ExceptionCodes.OBJECT_COPY_FAILED.message());
                                       }
-                                      if (co.getType() == OrderType.BUY_CLOSE) {
-                                          co.setType(OrderType.BUY_CLOSE_TODAY);
-                                      }
-                                      else if (co.getType() == OrderType.SELL_CLOSE) {
-                                          co.setType(OrderType.SELL_CLOSE_TODAY);
-                                      }
-                                      co.setVolumn(0L);
+                                      co.setOffset(Offset.CLOSE_TODAY);
+                                      co.setQuantity(0L);
                                       co.setTraderId(k);
                                       return co;
 
                                   });
-                o.setVolumn(o.getVolumn() + 1);
+                o.setQuantity(o.getQuantity() + 1);
             }
         }
 
-        var r = new HashSet<OrderRequest>(today.values());
+        var r = new HashSet<Request>(today.values());
         r.addAll(yd.values());
         return r;
     }
@@ -835,8 +828,7 @@ public class TraderEngine implements ITraderEngine {
     }
 
     private void setFrozenClose(double commission,
-                                Contract contract,
-                                OrderType type) throws TraderException {
+                                Contract contract) throws TraderException {
         IDataConnection conn = null;
         try {
             conn = ds.getConnection();
@@ -857,7 +849,6 @@ public class TraderEngine implements ITraderEngine {
             cms.setContractId(contract.getContractId());
             cms.setStatus(FeeStatus.FORZEN);
             cms.setTradingDay(tradingDay);
-            cms.setType(type);
             conn.addCommission(cms);
             /*
              * Commit change.
@@ -878,7 +869,7 @@ public class TraderEngine implements ITraderEngine {
     private void setFrozenOpen(double amount,
                                double margin,
                                double commission,
-                               OrderRequest request) throws DataSourceException {
+                               Request request) throws DataSourceException {
         IDataConnection conn = null;
         try {
             conn = ds.getConnection();
@@ -893,7 +884,7 @@ public class TraderEngine implements ITraderEngine {
             ctr.setInstrumentId(request.getInstrumentId());
             ctr.setOpenAmount(amount);
             ctr.setOpenTradingDay(tradingDay);
-            ctr.setOpenType(request.getType());
+            ctr.setDirection(request.getDirection());
             ctr.setStatus(ContractStatus.OPENING);
             conn.addContract(ctr);
             /*
@@ -906,7 +897,6 @@ public class TraderEngine implements ITraderEngine {
             cmn.setOrderId(request.getOrderId());
             cmn.setStatus(FeeStatus.FORZEN);
             cmn.setTradingDay(tradingDay);
-            cmn.setType(request.getType());
             conn.addCommission(cmn);
             /*
              * Add frozen commission.
@@ -918,7 +908,6 @@ public class TraderEngine implements ITraderEngine {
             mn.setOrderId(request.getOrderId());
             mn.setStatus(FeeStatus.FORZEN);
             mn.setTradingDay(tradingDay);
-            mn.setType(request.getType());
             conn.addMargin(mn);
             /*
              * Commit change.
@@ -938,7 +927,7 @@ public class TraderEngine implements ITraderEngine {
 
     private void settle(IDataSource ds, ITraderEngineAlgorithm algo) throws TraderException {
         final var conn = ds.getConnection();
-        var rs = conn.getOrderRequests();
+        var rs = conn.getRequests();
         if (rs == null) {
             throw new TraderException(ExceptionCodes.ORDER_REQS_NULL.code(),
                                       ExceptionCodes.ORDER_REQS_NULL.message());
@@ -949,29 +938,29 @@ public class TraderEngine implements ITraderEngine {
                 throw new TraderException(ExceptionCodes.ORDER_ID_NULL.code(),
                                           ExceptionCodes.ORDER_ID_NULL.message());
             }
-            var rsps = conn.getOrderResponsesByOrderId(orderId);
-            if (rsps == null) {
-                throw new TraderException(ExceptionCodes.ORDER_RSPS_NULL.code(),
-                                          ExceptionCodes.ORDER_RSPS_NULL.message());
+            var trades = conn.getTradesByOrderId(orderId);
+            if (trades == null) {
+                throw new TraderException(ExceptionCodes.NO_TRADE.code(),
+                                          ExceptionCodes.NO_TRADE.message());
             }
-            var ctrs = getContractsByOrderResponses(rsps);
+            var ctrs = getContractsByOrderResponses(trades);
             if (ctrs == null) {
-                throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
-                                          ExceptionCodes.CONTRACT_NULL.message());
+                throw new TraderException(ExceptionCodes.NO_CONTRACT.code(),
+                                          ExceptionCodes.NO_CONTRACT.message());
 
             }
-            var cals = conn.getCancelResponseByOrderId(orderId);
+            var cals = conn.getResponseByOrderId(orderId);
             if (cals == null) {
-                throw new TraderException(ExceptionCodes.CANCEL_RSPS_NULL.code(),
-                                          ExceptionCodes.CANCEL_RSPS_NULL.message());
+                throw new TraderException(ExceptionCodes.NO_RESPONSE.code(),
+                                          ExceptionCodes.NO_RESPONSE.message());
 
             }
-            var o = algo.getOrder(r, ctrs, rsps, cals);
+            var o = algo.getOrder(r, ctrs, trades, cals);
             var s = o.getStatus();
             if (s == OrderStatus.ACCEPTED
-                || s == OrderStatus.PART_TRADED_INQUE
-                || s == OrderStatus.PART_TRADED_NOQUE) {
-                cancelOrderRequest(r);
+                || s == OrderStatus.QUEUED
+                || s == OrderStatus.UNQUEUED) {
+                deleteOrderRequest(r);
             }
         }
         // Clear everyday to avoid mem leak.

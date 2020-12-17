@@ -17,18 +17,19 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelResponse;
 import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.Deposit;
+import com.df.proxier.Direction;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
+import com.df.proxier.Offset;
 import com.df.proxier.Order;
-import com.df.proxier.OrderRequest;
-import com.df.proxier.OrderResponse;
-import com.df.proxier.OrderType;
 import com.df.proxier.Position;
+import com.df.proxier.Request;
+import com.df.proxier.Response;
 import com.df.proxier.Tick;
+import com.df.proxier.Trade;
 import com.df.proxier.Withdraw;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -46,11 +47,11 @@ public interface ITraderEngineAlgorithm {
 
     Collection<Position> getPositions(Collection<Contract> contracts, Collection<Commission> commissions, Collection<Margin> margins, Map<String, Tick> ticks, Map<String, Instrument> instruments, LocalDate tradingDay) throws TraderEngineAlgorithmException;
 
-    Order getOrder(OrderRequest request, Collection<Contract> contracts, Collection<OrderResponse> trades, Collection<CancelResponse> cancels) throws TraderEngineAlgorithmException;
+    Order getOrder(Request request, Collection<Contract> contracts, Collection<Trade> trades, Collection<Response> responses) throws TraderEngineAlgorithmException;
 
     double getAmount(double price, Instrument instrument) throws TraderEngineAlgorithmException;
 
     double getMargin(double price, Instrument instrument) throws TraderEngineAlgorithmException;
 
-    double getCommission(double price, Instrument instrument, OrderType type) throws TraderEngineAlgorithmException;
+    double getCommission(double price, Instrument instrument, Direction direction, Offset offset) throws TraderEngineAlgorithmException;
 }

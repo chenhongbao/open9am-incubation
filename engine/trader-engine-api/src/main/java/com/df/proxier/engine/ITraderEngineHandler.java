@@ -17,11 +17,10 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.CancelRequest;
-import com.df.proxier.CancelResponse;
 import com.df.proxier.Contract;
-import com.df.proxier.OrderRequest;
-import com.df.proxier.OrderResponse;
+import com.df.proxier.Request;
+import com.df.proxier.Response;
+import com.df.proxier.Trade;
 import com.df.proxier.service.TraderRuntimeException;
 import java.util.Collection;
 
@@ -33,15 +32,13 @@ import java.util.Collection;
  */
 public interface ITraderEngineHandler {
 
-    void onOrderReponse(OrderResponse response);
+    void onTrade(Trade trade);
 
-    void onCancelResponse(CancelResponse response);
+    void onResponse(Response response);
 
     void onException(TraderRuntimeException exception);
 
-    void onException(OrderRequest request, TraderRuntimeException exception, int requestId);
-
-    void onException(CancelRequest request, TraderRuntimeException exception, int requestId);
+    void onException(Request request, TraderRuntimeException exception, int requestId);
 
     void onStatusChange(EngineStatus status);
 

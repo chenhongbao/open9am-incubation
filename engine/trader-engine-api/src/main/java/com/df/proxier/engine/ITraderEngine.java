@@ -16,10 +16,9 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.CancelRequest;
-import com.df.proxier.service.ITraderService;
 import com.df.proxier.Instrument;
-import com.df.proxier.OrderRequest;
+import com.df.proxier.Request;
+import com.df.proxier.service.ITraderService;
 import com.df.proxier.service.TraderException;
 import java.util.Collection;
 import java.util.Properties;
@@ -60,9 +59,9 @@ public interface ITraderEngine {
 
     void settle(Properties properties) throws TraderException;
 
-    void request(OrderRequest request, Instrument instrument, Properties properties, int requestId) throws TraderException;
+    void request(Request request, Instrument instrument, Properties properties, int requestId) throws TraderException;
 
-    void request(CancelRequest request, int requestId) throws TraderException;
+    void request(Request request, int requestId) throws TraderException;
 
     EngineStatus getStatus();
 

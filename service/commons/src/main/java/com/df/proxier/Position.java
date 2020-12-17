@@ -35,15 +35,16 @@ public class Position {
     private Double amount;
     private Double closeProfit;
     private Double commission;
+    private Direction direction;
     private Long frozenCloseVolumn;
     private Double frozenCommission;
     private Double frozenMargin;
     private Long frozenOpenVolumn;
     private String instrumentId;
     private Double margin;
-    private Double openAmount;
-    private Double openMargin;
-    private Long openVolumn;
+    private Double todayOpenAmount;
+    private Double todayOpenMargin;
+    private Long todayOpenVolumn;
     private Double positionProfit;
     private Double preAmount;
     private Double preMargin;
@@ -53,7 +54,6 @@ public class Position {
     private Double todayMargin;
     private Long todayVolumn;
     private LocalDate tradingDay;
-    private OrderType type;
     private Long volumn;
 
     public Position() {
@@ -81,6 +81,14 @@ public class Position {
 
     public void setCommission(Double commission) {
         this.commission = commission;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 
     public Long getFrozenCloseVolumn() {
@@ -132,28 +140,28 @@ public class Position {
         this.margin = margin;
     }
 
-    public Double getOpenAmount() {
-        return openAmount;
+    public Double getTodayOpenAmount() {
+        return todayOpenAmount;
     }
 
-    public void setOpenAmount(Double openAmount) {
-        this.openAmount = openAmount;
+    public void setTodayOpenAmount(Double todayOpenAmount) {
+        this.todayOpenAmount = todayOpenAmount;
     }
 
-    public Double getOpenMargin() {
-        return openMargin;
+    public Double getTodayOpenMargin() {
+        return todayOpenMargin;
     }
 
-    public void setOpenMargin(Double openMargin) {
-        this.openMargin = openMargin;
+    public void setTodayOpenMargin(Double todayOpenMargin) {
+        this.todayOpenMargin = todayOpenMargin;
     }
 
-    public Long getOpenVolumn() {
-        return openVolumn;
+    public Long getTodayOpenVolumn() {
+        return todayOpenVolumn;
     }
 
-    public void setOpenVolumn(Long openVolumn) {
-        this.openVolumn = openVolumn;
+    public void setTodayOpenVolumn(Long todayOpenVolumn) {
+        this.todayOpenVolumn = todayOpenVolumn;
     }
 
     public Double getPositionProfit() {
@@ -226,14 +234,6 @@ public class Position {
 
     public void setTradingDay(LocalDate tradingDay) {
         this.tradingDay = tradingDay;
-    }
-
-    public OrderType getType() {
-        return type;
-    }
-
-    public void setType(OrderType type) {
-        this.type = type;
     }
 
     public Long getVolumn() {
