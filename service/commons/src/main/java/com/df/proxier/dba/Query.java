@@ -191,22 +191,44 @@ class Query implements IQuery {
     private <T> String getInsertSql(MetaTable<T> meta,
                                     Object object) throws SQLException,
                                                           DbaException {
+        if (meta.fields().isEmpty()) {
+            throw new DbaException("No column in table '" + meta.getName() + "'.");
+        }
         ensureTable(meta);
-        return ""; // TODO getInsertSql
+        var sql = "INSERT INTO " + meta.getName();
+        String fields = "";
+        String values = "";
+        int i = 0;
+        try {
+            while (i < meta.fields().size() - 1) {
+                var f = meta.fields().get(i);
+                fields += f.getName() + ",";
+                values += getValue(f, object) + ",";
+            }
+            var f = meta.fields().get(i);
+            fields += f.getName();
+            values += getValue(f, object);
+            return sql + "(" + fields + ") VALUES (" + values + ")";
+        }
+        catch (IllegalArgumentException | IllegalAccessException ex) {
+            throw new DbaException(
+                    "Access field '" + meta.fields().get(i).getName() + "' failed.",
+                    ex);
+        }
     }
 
     private <T> String getRemoveSql(MetaTable<T> meta,
                                     ICondition<?> condition) throws SQLException,
                                                                     DbaException {
         ensureTable(meta);
-        return ""; // TODO getRemoveSql
+        return "DELETE FROM " + meta.getName() + " WHERE " + ((Condition<?>) condition).getSql();
     }
 
     private <T> String getSelectSql(MetaTable<T> meta,
                                     ICondition<?> condition) throws SQLException,
                                                                     DbaException {
         ensureTable(meta);
-        return ""; // TODO getSelectSql
+        return "SELECT * FROM " + meta.getName() + " WHERE " + ((Condition<?>) condition).getSql();
     }
 
     private Map<String, Integer> getTableColumns(String name, DatabaseMetaData dbMeta) throws SQLException {
@@ -222,8 +244,50 @@ class Query implements IQuery {
                                     Object object,
                                     ICondition<?> condition) throws SQLException,
                                                                     DbaException {
+        if (meta.fields().isEmpty()) {
+            throw new DbaException("No column in table '" + meta.getName() + "'.");
+        }
         ensureTable(meta);
-        return ""; // TODO getUpdateSql
+        var sql = "UPDATE " + meta.getName() + " SET ";
+        int i = 0;
+        try {
+            while (i < meta.fields().size() - 1) {
+                var f = meta.fields().get(i);
+                sql += f.getName() + "=" + getValue(f, object) + ",";
+            }
+            var f = meta.fields().get(i);
+            sql += f.getName() + "=" + getValue(f, object);
+            return sql + " WHERE " + ((Condition<?>) condition).getSql();
+        }
+        catch (IllegalArgumentException | IllegalAccessException ex) {
+            throw new DbaException(
+                    "Access field '" + meta.fields().get(i).getName() + "' failed.",
+                    ex);
+        }
+    }
+
+    private String getValue(MetaField f, Object object) throws IllegalArgumentException,
+                                                               IllegalAccessException,
+                                                               DbaException {
+        switch (f.getType()) {
+            case Types.BIGINT:
+                return Long.toString(f.getField().getLong(object));
+            case Types.INTEGER:
+                return Integer.toString(f.getField().getInt(object));
+            case Types.DECIMAL:
+                return Double.toString(f.getField().getDouble(object));
+            case Types.DATE:
+                var date = (LocalDate) f.getField().get(object);
+                return date != null ? sqlStringValue(date.toString()) : null;
+            case Types.TIMESTAMP_WITH_TIMEZONE:
+                var timestamp = (ZonedDateTime) f.getField().get(object);
+                return timestamp != null ? sqlStringValue(timestamp.toString()) : null;
+            case Types.CHAR:
+                var str = (String) f.getField().get(object);
+                return str != null ? sqlStringValue(str) : null;
+            default:
+                throw new DbaException("Unsupported SQL types: " + f.getType() + ".");
+        }
     }
 
     private <T> boolean hasTableName(MetaTable<T> meta, DatabaseMetaData dbMeta) throws SQLException {
@@ -275,6 +339,10 @@ class Query implements IQuery {
         catch (IllegalAccessException | IllegalArgumentException e) {
             throw new NoSuchFieldError("Fail setting field '" + f.getName() + "'.");
         }
+    }
+
+    private String sqlStringValue(String raw) {
+        return "'" + raw + "'";
     }
 
     private <T> void verifyTableColumns(MetaTable<T> meta, DatabaseMetaData dbMeta) throws SQLException,
