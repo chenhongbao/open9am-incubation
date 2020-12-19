@@ -96,7 +96,8 @@ public enum ExceptionCodes {
     NO_CONTRACT(0x49, "No contract."),
     INVALID_DELETING_COMMISSION_STATUS(0x4A, "Invalid deleting commission status."),
     PREPROCESS_TRADE_FAIL(0x4B, "Preprocess trade failed."),
-    PREPROCESS_RESPONSE_FAIL(0x4C, "Preprocess response failed.");
+    PREPROCESS_RESPONSE_FAIL(0x4C, "Preprocess response failed."),
+    DATA_HANDLER_NULL(0x4D, "Data handler null.");
 
     private final int code;
     private final String message;

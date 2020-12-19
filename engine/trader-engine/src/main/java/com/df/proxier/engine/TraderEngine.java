@@ -315,48 +315,6 @@ public class TraderEngine implements ITraderEngine {
         traders.put(traderId, i);
     }
 
-    private void callOnErasedAccount(Account a) {
-        if (handlers.isEmpty()) {
-            return;
-        }
-        handlers.keySet().parallelStream().forEach(h -> {
-            try {
-                h.onErasingAccount(a);
-            }
-            catch (Throwable th) {
-                try {
-                    h.onException(new TraderRuntimeException(
-                            ExceptionCodes.USER_CODE_ERROR.code(),
-                            ExceptionCodes.USER_CODE_ERROR.message(),
-                            th));
-                }
-                catch (Throwable ignored) {
-                }
-            }
-        });
-    }
-
-    private void callOnErasedContracts(Collection<Contract> cs) {
-        if (handlers.isEmpty()) {
-            return;
-        }
-        handlers.keySet().parallelStream().forEach(h -> {
-            try {
-                h.onErasingContracts(cs);
-            }
-            catch (Throwable th) {
-                try {
-                    h.onException(new TraderRuntimeException(
-                            ExceptionCodes.USER_CODE_ERROR.code(),
-                            ExceptionCodes.USER_CODE_ERROR.message(),
-                            th));
-                }
-                catch (Throwable ignored) {
-                }
-            }
-        });
-    }
-
     /*
      * If something is wrong, tell user to handle it. If the handling is wrong,
      * tell user the handling is wrong.
@@ -798,7 +756,6 @@ public class TraderEngine implements ITraderEngine {
             throw new TraderException(ExceptionCodes.ACCOUNT_NULL.code(),
                                       ExceptionCodes.ACCOUNT_NULL.message());
         }
-        callOnErasedAccount(a);
         final var conn = ds.getConnection();
         final var tradingDay = conn.getTradingDay();
 
@@ -820,7 +777,6 @@ public class TraderEngine implements ITraderEngine {
             throw new TraderException(ExceptionCodes.CONTRACT_NULL.code(),
                                       ExceptionCodes.CONTRACT_NULL.message());
         }
-        callOnErasedContracts(cs);
         for (var c : cs) {
             conn.removeContract(c.getContractId());
         }

@@ -17,7 +17,6 @@
 package com.df.proxier.engine;
 
 import com.df.proxier.Account;
-import com.df.proxier.Response;
 import com.df.proxier.Commission;
 import com.df.proxier.Contract;
 import com.df.proxier.ContractStatus;
@@ -26,8 +25,9 @@ import com.df.proxier.FeeStatus;
 import com.df.proxier.Instrument;
 import com.df.proxier.Margin;
 import com.df.proxier.Request;
-import com.df.proxier.Trade;
+import com.df.proxier.Response;
 import com.df.proxier.Tick;
+import com.df.proxier.Trade;
 import com.df.proxier.Withdraw;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -43,15 +43,21 @@ import java.util.Collection;
 public class TraderEngineDataConnection implements IDataConnection {
 
     private final Connection conn;
+    private final IDataListener lis;
 
     private Boolean exAutoCommit;
 
-    public TraderEngineDataConnection(Connection connection) throws DataSourceException {
+    public TraderEngineDataConnection(Connection connection, IDataListener listener) throws DataSourceException {
         if (connection == null) {
             throw new DataSourceException(ExceptionCodes.DATA_CONNECTION_NULL.code(),
                                           ExceptionCodes.DATA_CONNECTION_NULL.message());
         }
+        if (connection == null) {
+            throw new DataSourceException(ExceptionCodes.DATA_HANDLER_NULL.code(),
+                                          ExceptionCodes.DATA_HANDLER_NULL.message());
+        }
         conn = connection;
+        lis = listener;
     }
 
     @Override

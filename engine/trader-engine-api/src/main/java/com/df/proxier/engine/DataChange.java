@@ -16,28 +16,24 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.Request;
-import com.df.proxier.Response;
-import com.df.proxier.Trade;
-import com.df.proxier.service.TraderRuntimeException;
-
 /**
- * Handler for engine responses.
  *
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderEngineHandler {
+public enum DataChange {
+    CREATE(0xA0),
+    RETRIEVE(0xA1),
+    UPDATE(0xA2),
+    DELETE(0xA3);
 
-    void onTrade(Trade trade);
+    private final int code;
 
-    void onResponse(Response response);
+    private DataChange(int code) {
+        this.code = code;
+    }
 
-    void onException(TraderRuntimeException exception);
-
-    void onException(Request request, TraderRuntimeException exception, int requestId);
-
-    void onStatusChange(EngineStatus status);
-
-    void onTraderServiceStatusChange(int status);
+    public int code() {
+        return code;
+    }
 }

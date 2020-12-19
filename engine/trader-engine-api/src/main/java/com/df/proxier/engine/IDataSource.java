@@ -24,5 +24,7 @@ package com.df.proxier.engine;
  */
 public interface IDataSource {
 
-    IDataConnection getConnection();
+    IDataConnection getConnection() throws DataSourceException;
+
+    void addListener(IDataListener listener) throws DataSourceException;
 }
