@@ -16,18 +16,23 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.service.TraderException;
+import com.df.proxier.exceptions.EngineException;
 
 /**
  *
- * @author chenh
+ * @author Hongbao Chen
+ * @since 1.0
  */
-public class TraderEngineAlgorithmException extends TraderException {
+public class AlgorithmException extends EngineException {
 
-    private static final long serialVersionUID = 2244677396863386L;
+    private static final long serialVersionUID = 32556476342283L;
 
-    public TraderEngineAlgorithmException(int code, String message) {
+    public AlgorithmException(int code, String message) {
         super(code, message);
+    }
+
+    public AlgorithmException(int code, String message, Throwable cause) {
+        super(code, message, cause);
     }
 
 }

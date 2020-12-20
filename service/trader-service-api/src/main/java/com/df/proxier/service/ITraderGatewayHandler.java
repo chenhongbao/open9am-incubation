@@ -16,6 +16,7 @@
  */
 package com.df.proxier.service;
 
+import com.df.proxier.exceptions.GatewayRuntimeException;
 import com.df.proxier.Request;
 import com.df.proxier.Response;
 import com.df.proxier.Trade;
@@ -26,15 +27,15 @@ import com.df.proxier.Trade;
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface ITraderServiceHandler {
+public interface ITraderGatewayHandler {
 
     void onTrade(Trade trade);
 
     void onResponse(Response response);
 
-    void onException(TraderRuntimeException exception);
+    void onException(GatewayRuntimeException exception);
 
-    void onException(Request request, TraderRuntimeException exception, int requestId);
+    void onException(Request request, GatewayRuntimeException exception, int requestId);
 
     void onStatusChange(int status);
 }

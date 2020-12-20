@@ -25,13 +25,13 @@ import java.time.ZonedDateTime;
  * @author Hongbao Chen
  * @since 1.0
  */
-public class TraderServiceInfo {
+public class TraderGatewayInfo {
 
     private LocalDate actionDay;
     private LocalDate tradingDay;
     private ZonedDateTime updateTimestamp;
 
-    public TraderServiceInfo() {
+    public TraderGatewayInfo() {
     }
 
     public LocalDate getActionDay() {

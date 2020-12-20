@@ -16,10 +16,10 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.service.ITraderService;
-import com.df.proxier.service.ITraderServiceHandler;
 import java.time.ZonedDateTime;
 import java.util.Properties;
+import com.df.proxier.service.ITraderGateway;
+import com.df.proxier.service.ITraderGatewayHandler;
 
 /**
  * Trader service information.
@@ -31,13 +31,13 @@ public class TraderServiceRuntime {
 
     private Boolean enabled;
     private ITraderEngine engine;
-    private ITraderServiceHandler handler;
+    private ITraderGatewayHandler handler;
     private Properties initProperties;
     private String note;
     private final ZonedDateTime registerTimestamp;
     private Properties settleProperties;
     private Properties startProperties;
-    private ITraderService trader;
+    private ITraderGateway trader;
     private Integer traderId;
     private ZonedDateTime updateTimestamp;
 
@@ -59,11 +59,11 @@ public class TraderServiceRuntime {
         updateTimestamp();
     }
 
-    public ITraderServiceHandler getHandler() {
+    public ITraderGatewayHandler getHandler() {
         return handler;
     }
 
-    public void setHandler(ITraderServiceHandler handler) {
+    public void setHandler(ITraderGatewayHandler handler) {
         this.handler = handler;
         updateTimestamp();
     }
@@ -126,11 +126,11 @@ public class TraderServiceRuntime {
         updateTimestamp();
     }
 
-    public ITraderService getTrader() {
+    public ITraderGateway getTrader() {
         return trader;
     }
 
-    public void setTrader(ITraderService trader) {
+    public void setTrader(ITraderGateway trader) {
         this.trader = trader;
         updateTimestamp();
     }

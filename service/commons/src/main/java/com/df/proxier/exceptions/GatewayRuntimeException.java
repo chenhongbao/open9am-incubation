@@ -14,35 +14,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.df.proxier.service;
+package com.df.proxier.exceptions;
 
 /**
  *
  * @author chenh
  */
-public class TraderRuntimeException extends RuntimeException implements CodeMessage {
+public class GatewayRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 2955886225335647L;
 
     private final int code;
 
-    public TraderRuntimeException(int code, String message) {
+    public GatewayRuntimeException(int code, String message) {
         super(message);
         this.code = code;
     }
 
-    public TraderRuntimeException(int code, String message, Throwable cause) {
+    public GatewayRuntimeException(int code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
     }
 
-    @Override
     public int getCode() {
         return code;
-    }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
     }
 }

@@ -18,8 +18,8 @@ package com.df.proxier.engine;
 
 import com.df.proxier.Instrument;
 import com.df.proxier.Request;
-import com.df.proxier.service.ITraderService;
-import com.df.proxier.service.TraderException;
+import com.df.proxier.exceptions.EngineException;
+import com.df.proxier.service.ITraderGateway;
 import java.util.Collection;
 import java.util.Properties;
 
@@ -31,49 +31,49 @@ import java.util.Properties;
  */
 public interface ITraderEngine {
 
-    void registerTrader(int traderId, ITraderService trader) throws TraderException;
+    void registerTrader(int traderId, ITraderGateway trader) throws EngineException;
 
-    void enableTrader(int traderId, boolean enabled) throws TraderException;
+    void enableTrader(int traderId, boolean enabled) throws EngineException;
 
-    void unregisterTrader(int traderId) throws TraderException;
+    void unregisterTrader(int traderId) throws EngineException;
 
-    Collection<TraderServiceRuntime> getTraderServiceRuntimes() throws TraderException;
+    Collection<TraderServiceRuntime> getTraderServiceRuntimes() throws EngineException;
 
-    TraderServiceRuntime getTraderServiceInfo(int traderId) throws TraderException;
+    TraderServiceRuntime getTraderServiceInfo(int traderId) throws EngineException;
 
-    void setStartProperties(int traderId, Properties properties) throws TraderException;
+    void setStartProperties(int traderId, Properties properties) throws EngineException;
 
-    void addHandler(ITraderEngineHandler handler) throws TraderException;
+    void addHandler(ITraderEngineHandler handler) throws EngineException;
 
-    void removeHanlder(ITraderEngineHandler handler) throws TraderException;
+    void removeHanlder(ITraderEngineHandler handler) throws EngineException;
 
-    void start(Properties properties) throws TraderException;
+    void start(Properties properties) throws EngineException;
 
-    void stop() throws TraderException;
+    void stop() throws EngineException;
 
-    void setInitProperties(int traderId, Properties properties) throws TraderException;
+    void setInitProperties(int traderId, Properties properties) throws EngineException;
 
-    void initialize(Properties properties) throws TraderException;
+    void initialize(Properties properties) throws EngineException;
 
-    void setSettleProperties(int traderId, Properties properties) throws TraderException;
+    void setSettleProperties(int traderId, Properties properties) throws EngineException;
 
-    void settle(Properties properties) throws TraderException;
+    void settle(Properties properties) throws EngineException;
 
-    void request(Request request, Instrument instrument, Properties properties, int requestId) throws TraderException;
+    void request(Request request, Instrument instrument, Properties properties, int requestId) throws EngineException;
 
-    void request(Request request, int requestId) throws TraderException;
+    void request(Request request, int requestId) throws EngineException;
 
     EngineStatus getStatus();
 
-    void setDataSource(IDataSource dataSource) throws TraderException;
+    void setDataSource(IDataSource dataSource) throws EngineException;
 
     IDataSource getDataSource();
 
-    void setAlgorithm(ITraderEngineAlgorithm algo) throws TraderException;
+    void setAlgorithm(ITraderEngineAlgorithm algo) throws EngineException;
 
     ITraderEngineAlgorithm getAlgorithm();
 
     Collection<ITraderEngineHandler> handlers();
 
-    Instrument getRelatedInstrument(String instrumentId) throws TraderException;
+    Instrument getRelatedInstrument(String instrumentId) throws EngineException;
 }

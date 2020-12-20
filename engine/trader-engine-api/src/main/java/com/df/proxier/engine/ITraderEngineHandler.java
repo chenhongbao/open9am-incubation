@@ -19,7 +19,7 @@ package com.df.proxier.engine;
 import com.df.proxier.Request;
 import com.df.proxier.Response;
 import com.df.proxier.Trade;
-import com.df.proxier.service.TraderRuntimeException;
+import com.df.proxier.exceptions.EngineRuntimeException;
 
 /**
  * Handler for engine responses.
@@ -33,9 +33,9 @@ public interface ITraderEngineHandler {
 
     void onResponse(Response response);
 
-    void onException(TraderRuntimeException exception);
+    void onException(EngineRuntimeException exception);
 
-    void onException(Request request, TraderRuntimeException exception, int requestId);
+    void onException(Request request, EngineRuntimeException exception, int requestId);
 
     void onStatusChange(EngineStatus status);
 

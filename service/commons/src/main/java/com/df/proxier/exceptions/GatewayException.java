@@ -14,17 +14,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.df.proxier.service;
+package com.df.proxier.exceptions;
 
 /**
- * Message with code.
+ * Exception thrown by {@link ITraderService} with code and message.
  *
  * @author Hongbao Chen
  * @since 1.0
  */
-public interface CodeMessage {
+public class GatewayException extends Exception {
 
-    int getCode();
+    private static final long serialVersionUID = 4875322229246237L;
 
-    String getMessage();
+    private final int code;
+
+    public GatewayException(int code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public GatewayException(int code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
 }

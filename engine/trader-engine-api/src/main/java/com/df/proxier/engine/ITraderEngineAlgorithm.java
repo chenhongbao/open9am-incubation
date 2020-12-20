@@ -43,15 +43,15 @@ import java.util.Map;
  */
 public interface ITraderEngineAlgorithm {
 
-    Account getAccount(Account pre, Collection<Deposit> deposits, Collection<Withdraw> withdraws, Collection<Position> positions) throws TraderEngineAlgorithmException;
+    Account getAccount(Account pre, Collection<Deposit> deposits, Collection<Withdraw> withdraws, Collection<Position> positions) throws AlgorithmException;
 
-    Collection<Position> getPositions(Collection<Contract> contracts, Collection<Commission> commissions, Collection<Margin> margins, Map<String, Tick> ticks, Map<String, Instrument> instruments, LocalDate tradingDay) throws TraderEngineAlgorithmException;
+    Collection<Position> getPositions(Collection<Contract> contracts, Collection<Commission> commissions, Collection<Margin> margins, Map<String, Tick> ticks, Map<String, Instrument> instruments, LocalDate tradingDay) throws AlgorithmException;
 
-    Order getOrder(Request request, Collection<Contract> contracts, Collection<Trade> trades, Collection<Response> responses) throws TraderEngineAlgorithmException;
+    Order getOrder(Request request, Collection<Contract> contracts, Collection<Trade> trades, Collection<Response> responses) throws AlgorithmException;
 
-    double getAmount(double price, Instrument instrument) throws TraderEngineAlgorithmException;
+    double getAmount(double price, Instrument instrument) throws AlgorithmException;
 
-    double getMargin(double price, Instrument instrument) throws TraderEngineAlgorithmException;
+    double getMargin(double price, Instrument instrument) throws AlgorithmException;
 
-    double getCommission(double price, Instrument instrument, Direction direction, Offset offset) throws TraderEngineAlgorithmException;
+    double getCommission(double price, Instrument instrument, Direction direction, Offset offset) throws AlgorithmException;
 }

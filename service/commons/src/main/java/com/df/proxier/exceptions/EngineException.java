@@ -14,38 +14,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.df.proxier.service;
+package com.df.proxier.exceptions;
 
 /**
- * Exception thrown by {@link ITraderService} with code and message.
  *
- * @author Hongbao Chen
- * @since 1.0
+ * @author chenh
  */
-public class TraderException extends Exception implements CodeMessage {
+public class EngineException extends Exception {
 
-    private static final long serialVersionUID = 4875322229246237L;
+    private static final long serialVersionUID = 3421665487930276L;
 
     private final int code;
 
-    public TraderException(int code, String message) {
+    public EngineException(int code, String message) {
         super(message);
         this.code = code;
     }
 
-    public TraderException(int code, String message, Throwable cause) {
+    public EngineException(int code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
     }
 
-    @Override
     public int getCode() {
         return code;
     }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
-    }
-
 }

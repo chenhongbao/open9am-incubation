@@ -14,25 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.df.proxier.engine;
-
-import com.df.proxier.exceptions.EngineException;
+package com.df.proxier.exceptions;
 
 /**
  *
  * @author Hongbao Chen
  * @since 1.0
  */
-public class DataSourceException extends EngineException {
+public class EngineRuntimeException extends RuntimeException {
 
-    private static final long serialVersionUID = 154638779982L;
+    private static final long serialVersionUID = 4756298443210193L;
 
-    public DataSourceException(int code, String message) {
-        super(code, message);
+    private final int code;
+
+    public EngineRuntimeException(int code, String message) {
+        super(message);
+        this.code = code;
     }
 
-    public DataSourceException(int code, String message, Throwable cause) {
-        super(code, message, cause);
+    public EngineRuntimeException(int code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
     }
 
+    public int getCode() {
+        return code;
+    }
 }
