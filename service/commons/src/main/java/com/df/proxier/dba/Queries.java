@@ -54,6 +54,14 @@ public class Queries {
         return new Condition<>(condition, ConditionType.NOT);
     }
 
+    public static ICondition<ICondition<?>> isNull(Field field) throws DbaException {
+        return new Condition<>(field, ConditionType.IS_NULL);
+    }
+
+    public static ICondition<ICondition<?>> isNotNull(Field field) throws DbaException {
+        return new Condition<>(field, ConditionType.IS_NOT_NULL);
+    }
+
     public static ICondition<ICondition<?>> or(ICondition<?> c0, ICondition<?> c1) throws DbaException {
         return new Condition<>(c0, c1, ConditionType.OR);
     }

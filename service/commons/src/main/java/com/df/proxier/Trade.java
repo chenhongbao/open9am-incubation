@@ -30,7 +30,6 @@ public class Trade {
 
     private ActionType action;
     private Direction direction;
-
     private String instrumentId;
     private Offset offset;
     private Long orderId;

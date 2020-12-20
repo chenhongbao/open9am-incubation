@@ -97,7 +97,15 @@ public enum ExceptionCodes {
     INVALID_DELETING_COMMISSION_STATUS(0x4A, "Invalid deleting commission status."),
     PREPROCESS_TRADE_FAIL(0x4B, "Preprocess trade failed."),
     PREPROCESS_RESPONSE_FAIL(0x4C, "Preprocess response failed."),
-    DATA_HANDLER_NULL(0x4D, "Data handler null.");
+    DATA_HANDLER_NULL(0x4D, "Data handler null."),
+    DBA_INSERT_FAIL(0x4E, "Database insertion failed."),
+    DBA_SELECT_FAIL(0x4F, "Database selection failed."),
+    DBA_UPDATE_FAIL(0x50, "Database update failed."),
+    DBA_DELETE_FAIL(0x51, "Database deletion failed."),
+    REFLECTION_FAIL(0x52, "Reflection failed."),
+    MORE_ROWS_THAN_EXPECTED(0x53, "More rows than expected."),
+    LESS_ROWS_THAN_EXPECTED(0x54, "Less rows than expected."),
+    OBTAIN_CONDITION_FAIL(0x55, "Obtaining condition failed.");
 
     private final int code;
     private final String message;

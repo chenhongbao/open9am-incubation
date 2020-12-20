@@ -11,5 +11,5 @@ package com.df.proxier.dba;
  * @since 1.0
  */
 public enum ConditionType {
-    EQUALS, LESS_THAN, LARGER_THAN, AND, OR, NOT, LIKE
+    EQUALS, LESS_THAN, LARGER_THAN, AND, OR, NOT, LIKE, IS_NULL, IS_NOT_NULL
 }

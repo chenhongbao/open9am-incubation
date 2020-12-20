@@ -693,7 +693,7 @@ public class TraderEngine implements ITraderEngine {
 
     private Account getSettledAccount() throws TraderException {
         final var conn = ds.getConnection();
-        final var tradingDay = conn.getTradingDay();
+        final var tradingDay = conn.getTradingDay().getTradingDay();
         final var ids = getRalatedInstrumentIds();
         return algo.getAccount(conn.getAccount(),
                                conn.getDeposits(),
@@ -710,7 +710,7 @@ public class TraderEngine implements ITraderEngine {
         final var today = new HashMap<Integer, Request>(64);
         final var yd = new HashMap<Integer, Request>(64);
         final var conn = ds.getConnection();
-        var tradingDay = conn.getTradingDay();
+        var tradingDay = conn.getTradingDay().getTradingDay();
         for (var c : cs) {
             if (c.getOpenTradingDay().isBefore(tradingDay)) {
                 var o = yd.computeIfAbsent(c.getTraderId(), k -> {
@@ -757,7 +757,7 @@ public class TraderEngine implements ITraderEngine {
                                       ExceptionCodes.ACCOUNT_NULL.message());
         }
         final var conn = ds.getConnection();
-        final var tradingDay = conn.getTradingDay();
+        final var tradingDay = conn.getTradingDay().getTradingDay();
 
         a.setPreBalance(a.getBalance());
         a.setPreDeposit(a.getDeposit());
@@ -787,7 +787,7 @@ public class TraderEngine implements ITraderEngine {
         IDataConnection conn = null;
         try {
             conn = ds.getConnection();
-            final var tradingDay = conn.getTradingDay();
+            final var tradingDay = conn.getTradingDay().getTradingDay();
             conn.transaction();
             /*
              * Update contracts status to make it frozen.
@@ -828,7 +828,7 @@ public class TraderEngine implements ITraderEngine {
         IDataConnection conn = null;
         try {
             conn = ds.getConnection();
-            final var tradingDay = conn.getTradingDay();
+            final var tradingDay = conn.getTradingDay().getTradingDay();
             conn.transaction();
             /*
              * Add preparing contract.

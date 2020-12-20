@@ -33,6 +33,15 @@ class Condition<T> implements ICondition<T> {
         sqlv = stringValue(v0);
     }
 
+    Condition(Field field, ConditionType type) throws DbaException {
+        if (type != ConditionType.IS_NULL && type != ConditionType.IS_NOT_NULL) {
+            throw new IllegalArgumentException("Expect IS_NULL/IS_NOT_NULL but found " + type + ".");
+        }
+        meta = DbaUtils.inspectField(field);
+        t = type;
+        sqlv = stringValue(type);
+    }
+
     Condition(Field field, T value, ConditionType type) throws DbaException {
         meta = DbaUtils.inspectField(field);
         v0 = value;
@@ -98,6 +107,17 @@ class Condition<T> implements ICondition<T> {
     @Override
     public T getValue1() {
         return v1;
+    }
+
+    private String stringValue(ConditionType type) {
+        switch (type) {
+            case IS_NULL:
+                return "IS NULL";
+            case IS_NOT_NULL:
+                return "IS NOT NULL";
+            default:
+                throw new IllegalArgumentException("Expect IS_NULL/IS_NOT_NULL but found " + type + ".");
+        }
     }
 
     boolean checkBelonging(Class<?> clazz) {

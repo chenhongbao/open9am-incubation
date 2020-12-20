@@ -28,8 +28,8 @@ import com.df.proxier.Request;
 import com.df.proxier.Response;
 import com.df.proxier.Tick;
 import com.df.proxier.Trade;
+import com.df.proxier.TradingDay;
 import com.df.proxier.Withdraw;
-import java.time.LocalDate;
 import java.util.Collection;
 
 /**
@@ -136,13 +136,15 @@ public interface IDataConnection {
 
     void updateTick(Tick tick) throws DataSourceException;
 
-    LocalDate getTradingDay() throws DataSourceException;
+    TradingDay getTradingDay() throws DataSourceException;
 
-    void setTradingDay(LocalDate day);
+    void setTradingDay(TradingDay day) throws DataSourceException;
 
     void transaction() throws DataSourceException;
 
     void commit() throws DataSourceException;
 
     void rollback() throws DataSourceException;
+
+    IDataSource getDataSource();
 }

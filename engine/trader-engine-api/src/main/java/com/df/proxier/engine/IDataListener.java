@@ -16,47 +16,14 @@
  */
 package com.df.proxier.engine;
 
-import com.df.proxier.Account;
-import com.df.proxier.Commission;
-import com.df.proxier.Contract;
-import com.df.proxier.Deposit;
-import com.df.proxier.Instrument;
-import com.df.proxier.Margin;
-import com.df.proxier.Request;
-import com.df.proxier.Response;
-import com.df.proxier.Tick;
-import com.df.proxier.Trade;
-import com.df.proxier.Withdraw;
-import java.time.LocalDate;
-
 /**
  *
  * @author Hongbao Chen
+ * @param <T>
+ *
  * @since 1.0
  */
-public interface IDataListener {
+public interface IDataListener<T> {
 
-    void onChange(Margin margin, DataChange change, IDataConnection source);
-
-    void onChange(Commission commission, DataChange change, IDataConnection source);
-
-    void onChange(Contract contract, DataChange change, IDataConnection source);
-
-    void onChange(Account account, DataChange change, IDataConnection source);
-
-    void onChange(Deposit deposit, DataChange change, IDataConnection source);
-
-    void onChange(Withdraw withdraw, DataChange change, IDataConnection source);
-
-    void onChange(Instrument instrument, DataChange change, IDataConnection source);
-
-    void onChange(Request request, DataChange change, IDataConnection source);
-
-    void onChange(Response response, DataChange change, IDataConnection source);
-
-    void onChange(Trade trade, DataChange change, IDataConnection source);
-
-    void onChange(Tick tick, DataChange change, IDataConnection source);
-
-    void onTradingDay(LocalDate day, DataChange change, IDataConnection source);
+    void onChange(T margin, DataChange change, IDataConnection source);
 }

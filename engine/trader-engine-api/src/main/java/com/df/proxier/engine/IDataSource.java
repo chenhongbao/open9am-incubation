@@ -26,5 +26,5 @@ public interface IDataSource {
 
     IDataConnection getConnection() throws DataSourceException;
 
-    void addListener(IDataListener listener) throws DataSourceException;
+    <T> void addListener(Class<T> clazz, IDataListener<T> listener) throws DataSourceException;
 }
