@@ -68,6 +68,11 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
+    public void addAccount(Account account) throws DataSourceException {
+        callInsert(Account.class, account);
+    }
+
+    @Override
     public void addCommission(Commission commission) throws DataSourceException {
         callInsert(Commission.class, commission);
     }
@@ -110,6 +115,11 @@ public class TraderEngineDataConnection implements IDataConnection {
     @Override
     public void addTrade(Trade trade) throws DataSourceException {
         callInsert(Trade.class, trade);
+    }
+
+    @Override
+    public void addTradingDay(TradingDay day) throws DataSourceException {
+        callInsert(TradingDay.class, day);
     }
 
     @Override
@@ -651,28 +661,15 @@ public class TraderEngineDataConnection implements IDataConnection {
     }
 
     @Override
-    public void setTradingDay(TradingDay day) throws DataSourceException {
+    public void updateTradingDay(TradingDay day) throws DataSourceException {
         try {
-            var r = callGetMany(TradingDay.class,
-                            Queries.isNotNull(TradingDay.class.getDeclaredField("tradingDayId")),
-                            TradingDay::new);
-            if (r.isEmpty()) {
-                callInsert(TradingDay.class, day);
-            }
-            else {
-                callUpdate(TradingDay.class,
-                           day,
-                           TradingDay.class.getDeclaredField("tradingDayId"));
-            }
+            callUpdate(TradingDay.class,
+                       day,
+                       TradingDay.class.getDeclaredField("tradingDayId"));
         }
         catch (NoSuchFieldException | SecurityException ex) {
             throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
                                           ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
                                           ex);
         }
     }

@@ -40,111 +40,115 @@ import java.util.Collection;
  */
 public interface IDataConnection {
 
-    Collection<Margin> getMarginsByStatus(FeeStatus status) throws DataSourceException;
-
-    Collection<Margin> getMarginsByOrderId(long orderId) throws DataSourceException;
-
-    Collection<Margin> getMargins() throws DataSourceException;
-
-    Margin getMarginById(Long marginId) throws DataSourceException;
-
-    void addMargin(Margin margin) throws DataSourceException;
-
-    void removeMargin(long marginId) throws DataSourceException;
-
-    void updateMargin(Margin margin) throws DataSourceException;
-
-    Collection<Commission> getCommissionsByStatus(FeeStatus status) throws DataSourceException;
-
-    Collection<Commission> getCommissionsByOrderId(long orderId) throws DataSourceException;
-
-    Collection<Commission> getCommissions() throws DataSourceException;
-
-    Commission getCommissionById(Long commissionId) throws DataSourceException;
+    void addAccount(Account account) throws DataSourceException;
 
     void addCommission(Commission commission) throws DataSourceException;
 
-    void removeCommission(long commissionId) throws DataSourceException;
-
-    void updateCommission(Commission commission) throws DataSourceException;
-
-    Collection<Contract> getContractsByStatus(ContractStatus status) throws DataSourceException;
-
-    Contract getContractById(Long contractId) throws DataSourceException;
-
-    Collection<Contract> getContractsByTradeId(long tradeId) throws DataSourceException;
-
-    Collection<Contract> getContractsByInstrumentId(String instrumentId) throws DataSourceException;
-
-    Collection<Contract> getContracts() throws DataSourceException;
-
     void addContract(Contract contract) throws DataSourceException;
-
-    void removeContract(long contractId) throws DataSourceException;
-
-    void updateContract(Contract contract) throws DataSourceException;
-
-    Account getAccount() throws DataSourceException;
-
-    void updateAccount(Account account) throws DataSourceException;
-
-    Collection<Deposit> getDeposits() throws DataSourceException;
 
     void addDeposit(Deposit deposit) throws DataSourceException;
 
-    Collection<Withdraw> getWithdraws() throws DataSourceException;
+    void addInstrument(Instrument instrument) throws DataSourceException;
+
+    void addMargin(Margin margin) throws DataSourceException;
+
+    void addRequest(Request request) throws DataSourceException;
+
+    void addResponse(Response response) throws DataSourceException;
+
+    void addTick(Tick tick) throws DataSourceException;
+
+    void addTrade(Trade trade) throws DataSourceException;
+
+    void addTradingDay(TradingDay day) throws DataSourceException;
 
     void addWithdraw(Withdraw withdraw) throws DataSourceException;
 
-    Collection<Instrument> getInstrumentsByExchangeId(String exchangeId) throws DataSourceException;
+    void commit() throws DataSourceException;
+
+    Account getAccount() throws DataSourceException;
+
+    Commission getCommissionById(Long commissionId) throws DataSourceException;
+
+    Collection<Commission> getCommissions() throws DataSourceException;
+
+    Collection<Commission> getCommissionsByOrderId(long orderId) throws DataSourceException;
+
+    Collection<Commission> getCommissionsByStatus(FeeStatus status) throws DataSourceException;
+
+    Contract getContractById(Long contractId) throws DataSourceException;
+
+    Collection<Contract> getContracts() throws DataSourceException;
+
+    Collection<Contract> getContractsByInstrumentId(String instrumentId) throws DataSourceException;
+
+    Collection<Contract> getContractsByStatus(ContractStatus status) throws DataSourceException;
+
+    Collection<Contract> getContractsByTradeId(long tradeId) throws DataSourceException;
+
+    IDataSource getDataSource();
+
+    Collection<Deposit> getDeposits() throws DataSourceException;
 
     Instrument getInstrumentById(String instrumentId) throws DataSourceException;
 
-    void addInstrument(Instrument instrument) throws DataSourceException;
+    Collection<Instrument> getInstrumentsByExchangeId(String exchangeId) throws DataSourceException;
 
-    void removeInstrument(String instrumentId) throws DataSourceException;
+    Margin getMarginById(Long marginId) throws DataSourceException;
 
-    void updateInstrument(Instrument instrument) throws DataSourceException;
+    Collection<Margin> getMargins() throws DataSourceException;
 
-    Collection<Request> getRequests() throws DataSourceException;
+    Collection<Margin> getMarginsByOrderId(long orderId) throws DataSourceException;
+
+    Collection<Margin> getMarginsByStatus(FeeStatus status) throws DataSourceException;
 
     Request getRequestByOrderId(long orderId) throws DataSourceException;
 
-    void addRequest(Request request) throws DataSourceException;
+    Collection<Request> getRequests() throws DataSourceException;
+
+    Response getResponseById(long responseId) throws DataSourceException;
+
+    Collection<Response> getResponseByOrderId(long orderId) throws DataSourceException;
+
+    Collection<Response> getResponses() throws DataSourceException;
+
+    Tick getTickByInstrumentId(String instrumentId) throws DataSourceException;
+
+    Trade getTradeById(Long tradeId) throws DataSourceException;
 
     Collection<Trade> getTrades() throws DataSourceException;
 
     Collection<Trade> getTradesByOrderId(long orderId) throws DataSourceException;
 
-    Trade getTradeById(Long tradeId) throws DataSourceException;
+    TradingDay getTradingDay() throws DataSourceException;
 
-    void addTrade(Trade trade) throws DataSourceException;
+    void updateTradingDay(TradingDay day) throws DataSourceException;
 
-    Collection<Response> getResponses() throws DataSourceException;
+    Collection<Withdraw> getWithdraws() throws DataSourceException;
 
-    Collection<Response> getResponseByOrderId(long orderId) throws DataSourceException;
+    void removeCommission(long commissionId) throws DataSourceException;
 
-    Response getResponseById(long responseId) throws DataSourceException;
+    void removeContract(long contractId) throws DataSourceException;
 
-    void addResponse(Response response) throws DataSourceException;
+    void removeInstrument(String instrumentId) throws DataSourceException;
 
-    Tick getTickByInstrumentId(String instrumentId) throws DataSourceException;
-
-    void addTick(Tick tick) throws DataSourceException;
+    void removeMargin(long marginId) throws DataSourceException;
 
     void removeTick(String instrumentId) throws DataSourceException;
 
-    void updateTick(Tick tick) throws DataSourceException;
-
-    TradingDay getTradingDay() throws DataSourceException;
-
-    void setTradingDay(TradingDay day) throws DataSourceException;
+    void rollback() throws DataSourceException;
 
     void transaction() throws DataSourceException;
 
-    void commit() throws DataSourceException;
+    void updateAccount(Account account) throws DataSourceException;
 
-    void rollback() throws DataSourceException;
+    void updateCommission(Commission commission) throws DataSourceException;
 
-    IDataSource getDataSource();
+    void updateContract(Contract contract) throws DataSourceException;
+
+    void updateInstrument(Instrument instrument) throws DataSourceException;
+
+    void updateMargin(Margin margin) throws DataSourceException;
+
+    void updateTick(Tick tick) throws DataSourceException;
 }
