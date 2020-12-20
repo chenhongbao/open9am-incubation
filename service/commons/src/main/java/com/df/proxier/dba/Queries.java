@@ -34,15 +34,7 @@ public class Queries {
         return new Query(dbConnection);
     }
 
-    public static ICondition<Long> equals(Field field, Long value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.EQUALS);
-    }
-
-    public static ICondition<Integer> equals(Field field, Integer value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.EQUALS);
-    }
-
-    public static ICondition<String> equals(Field field, String value) throws DbaException {
+    public static <T> ICondition<T> equals(Field field, T value) throws DbaException {
         return new Condition<>(field, value, ConditionType.EQUALS);
     }
 
@@ -66,27 +58,11 @@ public class Queries {
         return new Condition<>(c0, c1, ConditionType.OR);
     }
 
-    public static ICondition<Long> lessThan(Field field, Long value) throws DbaException {
+    public static <T> ICondition<T> lessThan(Field field, T value) throws DbaException {
         return new Condition<>(field, value, ConditionType.LESS_THAN);
     }
 
-    public static ICondition<Integer> lessThan(Field field, Integer value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.LESS_THAN);
-    }
-
-    public static ICondition<String> lessThan(Field field, String value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.LESS_THAN);
-    }
-
-    public static ICondition<Long> largerThan(Field field, Long value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.LARGER_THAN);
-    }
-
-    public static ICondition<Integer> largerThan(Field field, Integer value) throws DbaException {
-        return new Condition<>(field, value, ConditionType.LARGER_THAN);
-    }
-
-    public static ICondition<String> largerThan(Field field, String value) throws DbaException {
+    public static <T> ICondition<T> largerThan(Field field, T value) throws DbaException {
         return new Condition<>(field, value, ConditionType.LARGER_THAN);
     }
 

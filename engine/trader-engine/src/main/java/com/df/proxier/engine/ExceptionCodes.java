@@ -105,7 +105,8 @@ public enum ExceptionCodes {
     REFLECTION_FAIL(0x52, "Reflection failed."),
     MORE_ROWS_THAN_EXPECTED(0x53, "More rows than expected."),
     LESS_ROWS_THAN_EXPECTED(0x54, "Less rows than expected."),
-    OBTAIN_CONDITION_FAIL(0x55, "Obtaining condition failed.");
+    OBTAIN_CONDITION_FAIL(0x55, "Obtaining condition failed."),
+    INVALID_PK_TYPE(0x56, "Invalid primary key type.");
 
     private final int code;
     private final String message;

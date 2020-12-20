@@ -39,8 +39,6 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Trader engine's data connection.
@@ -52,7 +50,6 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     private final Connection conn;
     private Boolean exAutoCommit;
-    private final Map<Class<?>, IDataListener<?>> listeners = new HashMap<>(64);
     private final IQuery query;
     private final IDataSource src;
 
@@ -72,52 +69,52 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     @Override
     public void addCommission(Commission commission) throws DataSourceException {
-        findListenerAndInsert(Commission.class, commission);
+        callInsert(Commission.class, commission);
     }
 
     @Override
     public void addContract(Contract contract) throws DataSourceException {
-        findListenerAndInsert(Contract.class, contract);
+        callInsert(Contract.class, contract);
     }
 
     @Override
     public void addDeposit(Deposit deposit) throws DataSourceException {
-        findListenerAndInsert(Deposit.class, deposit);
+        callInsert(Deposit.class, deposit);
     }
 
     @Override
     public void addInstrument(Instrument instrument) throws DataSourceException {
-        findListenerAndInsert(Instrument.class, instrument);
+        callInsert(Instrument.class, instrument);
     }
 
     @Override
     public void addMargin(Margin margin) throws DataSourceException {
-        findListenerAndInsert(Margin.class, margin);
+        callInsert(Margin.class, margin);
     }
 
     @Override
     public void addRequest(Request request) throws DataSourceException {
-        findListenerAndInsert(Request.class, request);
+        callInsert(Request.class, request);
     }
 
     @Override
     public void addResponse(Response response) throws DataSourceException {
-        findListenerAndInsert(Response.class, response);
+        callInsert(Response.class, response);
     }
 
     @Override
     public void addTick(Tick tick) throws DataSourceException {
-        findListenerAndInsert(Tick.class, tick);
+        callInsert(Tick.class, tick);
     }
 
     @Override
     public void addTrade(Trade trade) throws DataSourceException {
-        findListenerAndInsert(Trade.class, trade);
+        callInsert(Trade.class, trade);
     }
 
     @Override
     public void addWithdraw(Withdraw withdraw) throws DataSourceException {
-        findListenerAndInsert(Withdraw.class, withdraw);
+        callInsert(Withdraw.class, withdraw);
     }
 
     @Override
@@ -701,92 +698,42 @@ public class TraderEngineDataConnection implements IDataConnection {
 
     @Override
     public void removeCommission(long commissionId) throws DataSourceException {
-        try {
-            query.remove(Commission.class,
-                         Queries.equals(Commission.class.getField("commissionId"), commissionId));
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
-                                          ex);
-        }
-        catch (NoSuchFieldException | SecurityException ex) {
-            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
-                                          ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
+        callRemove(Commission.class,
+                   "commissionId",
+                   commissionId,
+                   Commission::new);
     }
 
     @Override
     public void removeContract(long contractId) throws DataSourceException {
-        try {
-            query.remove(Contract.class,
-                         Queries.equals(Contract.class.getField("contractId"), contractId));
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
-                                          ex);
-        }
-        catch (NoSuchFieldException | SecurityException ex) {
-            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
-                                          ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
+        callRemove(Contract.class,
+                   "contractId",
+                   contractId,
+                   Contract::new);
     }
 
     @Override
     public void removeInstrument(String instrumentId) throws DataSourceException {
-        try {
-            query.remove(Instrument.class,
-                         Queries.equals(Instrument.class.getField("instrumentId"), instrumentId));
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
-                                          ex);
-        }
-        catch (NoSuchFieldException | SecurityException ex) {
-            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
-                                          ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
+        callRemove(Instrument.class,
+                   "instrumentId",
+                   instrumentId,
+                   Instrument::new);
     }
 
     @Override
     public void removeMargin(long marginId) throws DataSourceException {
-        try {
-            query.remove(Margin.class,
-                         Queries.equals(Margin.class.getField("marginId"), marginId));
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
-                                          ex);
-        }
-        catch (NoSuchFieldException | SecurityException ex) {
-            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
-                                          ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
+        callRemove(Margin.class,
+                   "marginId",
+                   marginId,
+                   Margin::new);
     }
 
     @Override
     public void removeTick(String instrumentId) throws DataSourceException {
-        try {
-            query.remove(Tick.class,
-                         Queries.equals(Tick.class.getField("instrumentId"), instrumentId));
-        }
-        catch (DbaException ex) {
-            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
-                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
-                                          ex);
-        }
-        catch (NoSuchFieldException | SecurityException ex) {
-            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
-                                          ExceptionCodes.REFLECTION_FAIL.message(),
-                                          ex);
-        }
+        callRemove(Tick.class,
+                   "instrumentId",
+                   instrumentId,
+                   Tick::new);
     }
 
     @Override
@@ -942,6 +889,12 @@ public class TraderEngineDataConnection implements IDataConnection {
     private <T> void callInsert(Class<T> clazz, T object) throws DataSourceException {
         try {
             query.insert(clazz, object);
+            var listener = src.getListener(clazz);
+            if (listener != null) {
+                callOnChange(object,
+                             DataChange.CREATE,
+                             listener);
+            }
         }
         catch (DbaException ex) {
             throw new DataSourceException(ExceptionCodes.DBA_INSERT_FAIL.code(),
@@ -950,9 +903,11 @@ public class TraderEngineDataConnection implements IDataConnection {
         }
     }
 
-    private <T> void callOnChange(T object, IDataListener<T> listener) throws DataSourceException {
+    private <T> void callOnChange(T object,
+                                  DataChange change,
+                                  IDataListener<T> listener) throws DataSourceException {
         try {
-            listener.onChange(object, DataChange.CREATE, this);
+            listener.onChange(object, change, this);
         }
         catch (Throwable th) {
             throw new DataSourceException(ExceptionCodes.USER_CODE_ERROR.code(),
@@ -961,11 +916,45 @@ public class TraderEngineDataConnection implements IDataConnection {
         }
     }
 
+    private <T, V> void callRemove(Class<T> clazz,
+                                   String fieldName,
+                                   V id,
+                                   IDefaultFactory<T> factory) throws DataSourceException {
+        try {
+            var listener = src.getListener(clazz);
+            if (listener != null) {
+                callOnChange(callGetSingle(clazz,
+                                           Queries.equals(clazz.getDeclaredField(fieldName), id),
+                                           factory),
+                             DataChange.DELETE,
+                             listener);
+            }
+            query.remove(Commission.class,
+                         Queries.equals(Commission.class.getField(fieldName), id));
+        }
+        catch (DbaException ex) {
+            throw new DataSourceException(ExceptionCodes.OBTAIN_CONDITION_FAIL.code(),
+                                          ExceptionCodes.OBTAIN_CONDITION_FAIL.message(),
+                                          ex);
+        }
+        catch (NoSuchFieldException | SecurityException ex) {
+            throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
+                                          ExceptionCodes.REFLECTION_FAIL.message(),
+                                          ex);
+        }
+    }
+
     private <T> void callUpdate(Class<T> clazz, T object, Field field) throws DataSourceException {
         try {
             query.update(clazz,
                          object,
                          Queries.equals(field, field.getLong(object)));
+            var listener = src.getListener(clazz);
+            if (listener != null) {
+                callOnChange(object,
+                             DataChange.UPDATE,
+                             listener);
+            }
         }
         catch (DbaException ex) {
             throw new DataSourceException(ExceptionCodes.DBA_UPDATE_FAIL.code(),
@@ -976,15 +965,6 @@ public class TraderEngineDataConnection implements IDataConnection {
             throw new DataSourceException(ExceptionCodes.REFLECTION_FAIL.code(),
                                           ExceptionCodes.REFLECTION_FAIL.message(),
                                           ex);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> void findListenerAndInsert(Class<T> clazz, T object) throws DataSourceException {
-        callInsert(clazz, object);
-        var listener = listeners.get(clazz);
-        if (listener != null) {
-            callOnChange(object, (IDataListener<T>) listener);
         }
     }
 
